@@ -1,0 +1,20 @@
+{
+    "name": "akseonov/php2",
+    "autoload": {
+        "psr-4": {
+            "Akseonov\\Php2\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "akseonov",
+            "email": "k.aksenov@legacystudio.ru"
+        }
+    ],
+    "require": {
+        "fakerphp/faker": "^1.20",
+        "roave/security-advisories": "dev-latest",
+        "ext-pdo": "*",
+        "symfony/polyfill-uuid": "^1.26"
+    }
+}
