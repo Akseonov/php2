@@ -1,18 +1,18 @@
 <?php
 
-namespace Akseonov\Php2\Blog\Repositories;
+namespace Akseonov\Php2\Blog\Repositories\UsersRepository;
 
-use Akseonov\Php2\Blog\Exceptions\{UserNotFoundException,InvalidArgumentException};
+use Akseonov\Php2\Blog\Exceptions\{InvalidArgumentException, UserNotFoundException};
 use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
 use Akseonov\Php2\Person\Name;
 
 class SqliteUsersRepository implements UsersRepositoryInterface
 {
-    private \PDO $connection;
-
-    public function __construct(\PDO $connection) {
-        $this->connection = $connection;
+    public function __construct(
+        private \PDO $connection,
+    )
+    {
     }
 
     /**
@@ -51,6 +51,10 @@ class SqliteUsersRepository implements UsersRepositoryInterface
         ]);
     }
 
+    /**
+     * @throws UserNotFoundException
+     * @throws InvalidArgumentException
+     */
     public function get(UUID $uuid): User
     {
         $statement = $this->connection->prepare(
@@ -75,6 +79,10 @@ class SqliteUsersRepository implements UsersRepositoryInterface
         );
     }
 
+    /**
+     * @throws UserNotFoundException
+     * @throws InvalidArgumentException
+     */
     public function getByUsername(string $username): User
     {
         $statement = $this->connection->prepare(

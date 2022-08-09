@@ -13,7 +13,8 @@ class Person
     public function __construct(
         Name $name,
         DateTimeImmutable $registeredOn
-    ) {
+    )
+    {
         $this->registeredOn = $registeredOn;
         $this->name = $name;
     }

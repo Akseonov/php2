@@ -35,27 +35,11 @@ class User
     }
 
     /**
-     * @param UUID $uuid
-     */
-    public function setUuid(UUID $uuid): void
-    {
-        $this->uuid = $uuid;
-    }
-
-    /**
      * @return string
      */
     public function getUsername(): string
     {
         return $this->username;
-    }
-
-    /**
-     * @param string $username
-     */
-    public function setUsername(string $username): void
-    {
-        $this->username = $username;
     }
 
     /**
@@ -65,14 +49,4 @@ class User
     {
         return $this->name;
     }
-
-    /**
-     * @param Name $name
-     */
-    public function setName(Name $name): void
-    {
-        $this->name = $name;
-    }
-
-
 }

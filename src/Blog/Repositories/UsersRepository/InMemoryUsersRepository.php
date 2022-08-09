@@ -1,6 +1,6 @@
 <?php
 
-namespace Akseonov\Php2\Blog\Repositories;
+namespace Akseonov\Php2\Blog\Repositories\UsersRepository;
 
 use Akseonov\Php2\Blog\Exceptions\UserNotFoundException;
 use Akseonov\Php2\Blog\User;

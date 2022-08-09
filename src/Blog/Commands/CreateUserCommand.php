@@ -2,13 +2,13 @@
 
 namespace Akseonov\Php2\Blog\Commands;
 
+use Akseonov\Php2\Blog\Exceptions\ArgumentsException;
 use Akseonov\Php2\Blog\Exceptions\CommandException;
 use Akseonov\Php2\Blog\Exceptions\UserNotFoundException;
-use Akseonov\Php2\Blog\Repositories\UsersRepositoryInterface;
+use Akseonov\Php2\Blog\Repositories\UsersRepository\UsersRepositoryInterface;
 use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
 use Akseonov\Php2\Person\Name;
-use Akseonov\Php2\Blog\Exceptions\ArgumentsException;
 
 class CreateUserCommand
 {
