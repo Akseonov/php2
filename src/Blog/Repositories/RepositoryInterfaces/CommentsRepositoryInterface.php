@@ -1,6 +1,6 @@
 <?php
 
-namespace Akseonov\Php2\Blog\Repositories\CommentsRepository;
+namespace Akseonov\Php2\Blog\Repositories\RepositoryInterfaces;
 
 use Akseonov\Php2\Blog\Comment;
 use Akseonov\Php2\Blog\UUID;

@@ -2,12 +2,11 @@
 
 namespace Akseonov\Php2\Blog\Commands;
 
+use Akseonov\Php2\Blog\Exceptions\ArgumentsException;
 use Akseonov\Php2\Blog\Exceptions\CommandException;
 use Akseonov\Php2\Blog\Exceptions\PostNotFoundException;
-use Akseonov\Php2\Blog\Exceptions\UserNotFoundException;
-use Akseonov\Php2\Blog\Exceptions\ArgumentsException;
 use Akseonov\Php2\Blog\Post;
-use Akseonov\Php2\Blog\Repositories\PostsRepository\PostRepositoryInterface;
+use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostRepositoryInterface;
 use Akseonov\Php2\Blog\UUID;
 
 class CreatePostCommand

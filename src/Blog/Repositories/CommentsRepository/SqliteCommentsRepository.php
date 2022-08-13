@@ -5,6 +5,7 @@ namespace Akseonov\Php2\Blog\Repositories\CommentsRepository;
 use Akseonov\Php2\Blog\Comment;
 use Akseonov\Php2\Blog\Exceptions\CommentNotFoundException;
 use Akseonov\Php2\Blog\Exceptions\InvalidArgumentException;
+use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\CommentsRepositoryInterface;
 use Akseonov\Php2\Blog\UUID;
 
 class SqliteCommentsRepository implements CommentsRepositoryInterface

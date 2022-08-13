@@ -1,6 +1,6 @@
 <?php
 
-namespace Akseonov\Php2\Blog\Repositories\UsersRepository;
+namespace Akseonov\Php2\Blog\Repositories\RepositoryInterfaces;
 
 use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;

@@ -5,6 +5,11 @@
             "Akseonov\\Php2\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Akseonov\\Php2\\Blog\\UnitTests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "akseonov",
@@ -12,9 +17,16 @@
         }
     ],
     "require": {
-        "fakerphp/faker": "^1.20",
-        "roave/security-advisories": "dev-latest",
         "ext-pdo": "*",
         "symfony/polyfill-uuid": "^1.26"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "fakerphp/faker": "^1.20",
+        "roave/security-advisories": "dev-latest"
+    },
+    "scripts": {
+        "test": "phpunit tests --testdox --colors"
     }
+
 }
