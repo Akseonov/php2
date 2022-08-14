@@ -5,10 +5,10 @@ namespace Akseonov\Php2\Blog\Repositories\PostsRepository;
 use Akseonov\Php2\Blog\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Blog\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Blog\Post;
-use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostRepositoryInterface;
+use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostsRepositoryInterface;
 use Akseonov\Php2\Blog\UUID;
 
-class SqlitePostsRepository implements PostRepositoryInterface
+class SqlitePostsRepository implements PostsRepositoryInterface
 {
     public function __construct(
         private \PDO $connection,
@@ -19,12 +19,12 @@ class SqlitePostsRepository implements PostRepositoryInterface
     /**
      * @throws InvalidArgumentException|PostNotFoundException
      */
-    private function getPost(\PDOStatement $statement, string $title): Post
+    private function getPost(\PDOStatement $statement, string $postInfo): Post
     {
         $result = $statement->fetch(\PDO::FETCH_ASSOC);
         if ($result === false) {
             throw new PostNotFoundException(
-                "Cannot get post: $title"
+                "Cannot get post: $postInfo"
             );
         }
 
@@ -64,21 +64,23 @@ class SqlitePostsRepository implements PostRepositoryInterface
         $statement->execute([
             ':uuid' => (string)$uuid,
         ]);
-        $result = $statement->fetch(\PDO::FETCH_ASSOC);
 
-        // Бросаем исключение, если пользователь не найден
-        if ($result === false) {
-            throw new PostNotFoundException(
-                "Cannot get post: $uuid"
-            );
-        }
-
-        return new Post(
-            new UUID($result['uuid']),
-            new UUID($result['author_uuid']),
-            $result['title'],
-            $result['text']
-        );
+        return $this->getPost($statement, $uuid);
+//        $result = $statement->fetch(\PDO::FETCH_ASSOC);
+//
+//        // Бросаем исключение, если пользователь не найден
+//        if ($result === false) {
+//            throw new PostNotFoundException(
+//                "Cannot get post: $uuid"
+//            );
+//        }
+//
+//        return new Post(
+//            new UUID($result['uuid']),
+//            new UUID($result['author_uuid']),
+//            $result['title'],
+//            $result['text']
+//        );
     }
 
     /**

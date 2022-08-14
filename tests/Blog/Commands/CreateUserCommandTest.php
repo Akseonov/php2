@@ -1,6 +1,6 @@
 <?php
 
-namespace Akseonov\Php2\Blog\UnitTests\Commands;
+namespace Akseonov\Php2\UnitTests\Blog\Commands;
 
 use Akseonov\Php2\Blog\Commands\Arguments;
 use Akseonov\Php2\Blog\Commands\CreateUserCommand;
@@ -8,38 +8,27 @@ use Akseonov\Php2\Blog\Exceptions\ArgumentsException;
 use Akseonov\Php2\Blog\Exceptions\CommandException;
 use Akseonov\Php2\Blog\Exceptions\UserNotFoundException;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\UsersRepositoryInterface;
-use Akseonov\Php2\Blog\Repositories\UsersRepository\DummyUsersRepository;
 use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Person\Name;
 use PHPUnit\Framework\TestCase;
 
 class CreateUserCommandTest extends TestCase
 {
-    /**
-     * @throws ArgumentsException
-     */
-    public function testItThrowsAnExceptionWhenUserAlreadyExists(): void
+    private function makeUsersRepositoryWithNotFoundException(): UsersRepositoryInterface
     {
-        $command = new CreateUserCommand(
-            new DummyUsersRepository()
-        );
-
-        $this->expectException(CommandException::class);
-        $this->expectExceptionMessage('User already exists: Ivan');
-
-        $command->handle(new Arguments(['username' => 'Ivan']));
-    }
-
-    private function makeUsersRepository(): UsersRepositoryInterface
-    {
-        return new class implements UsersRepositoryInterface {
+        return new class implements UsersRepositoryInterface
+        {
             public function save(User $user): void
             {
+
             }
+
             public function get(UUID $uuid): User
             {
                 throw new UserNotFoundException("Not found");
             }
+
             public function getByUsername(string $username): User
             {
                 throw new UserNotFoundException("Not found");
@@ -47,14 +36,65 @@ class CreateUserCommandTest extends TestCase
         };
     }
 
+    private function makeUserRepositoryWithUserObjectInReturn(): UsersRepositoryInterface
+    {
+        return new class implements UsersRepositoryInterface
+        {
+            public function save(User $user): void
+            {
+
+            }
+
+            public function get(UUID $uuid): User
+            {
+                return new User(UUID::random(), "Ivan", new Name("Ivan", "Nikitin"));
+            }
+
+            public function getByUsername(string $username): User
+            {
+                return new User(UUID::random(), "Ivan", new Name("Ivan", "Nikitin"));
+            }
+        };
+    }
+
+    /**
+     * @throws ArgumentsException
+     */
+    public function testItThrowsAnExceptionWhenUserAlreadyExists(): void
+    {
+        $command = new CreateUserCommand($this->makeUserRepositoryWithUserObjectInReturn());
+
+        $this->expectException(CommandException::class);
+        $this->expectExceptionMessage('User already exists: Ivan');
+
+        $command->handle(new Arguments([
+            'username' => 'Ivan',
+        ]));
+    }
+
+    /**
+     * @throws CommandException
+     */
+    public function testItRequiresUsername(): void
+    {
+        $command = new CreateUserCommand($this->makeUsersRepositoryWithNotFoundException());
+
+        $this->expectException(ArgumentsException::class);
+        $this->expectExceptionMessage('No such argument: username');
+
+        $command->handle(new Arguments([]));
+    }
+
     /**
      * @throws CommandException
      */
     public function testItRequiresLastName(): void
     {
-        $command = new CreateUserCommand($this->makeUsersRepository());
+        $command = new CreateUserCommand($this->makeUsersRepositoryWithNotFoundException());
+
         $this->expectException(ArgumentsException::class);
         $this->expectExceptionMessage('No such argument: last_name');
+
         $command->handle(new Arguments([
             'username' => 'Ivan',
             'first_name' => 'Ivan',
@@ -66,9 +106,11 @@ class CreateUserCommandTest extends TestCase
      */
     public function testItRequiresFirstName(): void
     {
-        $command = new CreateUserCommand($this->makeUsersRepository());
+        $command = new CreateUserCommand($this->makeUsersRepositoryWithNotFoundException());
+
         $this->expectException(ArgumentsException::class);
         $this->expectExceptionMessage('No such argument: first_name');
+
         $command->handle(new Arguments(['username' => 'Ivan']));
     }
 

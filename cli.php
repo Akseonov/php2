@@ -18,23 +18,23 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 $connection = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
 
-//$usersRepository = new SqliteUsersRepository($connection);
+$usersRepository = new SqliteUsersRepository($connection);
 //$usersRepository = new InMemoryUsersRepository();
-//$commandUser = new CreateUserCommand($usersRepository);
+$commandUser = new CreateUserCommand($usersRepository);
 
 
 //$postsRepository = new SqlitePostsRepository($connection);
 //$commandPost = new CreatePostCommand($postsRepository);
 
 
-$commentsRepository = new SqliteCommentsRepository($connection);
-$commandComment = new CreateCommentCommand($commentsRepository);
+//$commentsRepository = new SqliteCommentsRepository($connection);
+//$commandComment = new CreateCommentCommand($commentsRepository);
 
 try {
 //    $commandUser->handle(Arguments::fromArgv($argv));
 
 //    $usersRepository->save(new User(UUID::random(), 'admin', new Name('Peter', 'Romanov')));
-//    echo $usersRepository->get(new UUID('1906077b-c349-4a2c-9c88-000ff8875e8e'));
+    echo $usersRepository->get(new UUID('a3e78b09-23ae-44fd-9939-865f688894f5'));
 //    echo $usersRepository->getByUsername('ivan');
 
 
@@ -46,7 +46,7 @@ try {
 //    echo $postsRepository->getByTitle('Имя мне Моисей');
 
 
-    $commandComment->handle(Arguments::fromArgv($argv));
+//    $commandComment->handle(Arguments::fromArgv($argv));
 
 //    $commentsRepository->save(new Comment(UUID::random(), UUID::random(), UUID::random(), 'Мой первый комментарий'));
 //    echo $commentsRepository->get(new UUID('b63ec77a-9eca-4560-a3fa-c061704a13cd'));

@@ -6,13 +6,13 @@ use Akseonov\Php2\Blog\Exceptions\ArgumentsException;
 use Akseonov\Php2\Blog\Exceptions\CommandException;
 use Akseonov\Php2\Blog\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Blog\Post;
-use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostRepositoryInterface;
+use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostsRepositoryInterface;
 use Akseonov\Php2\Blog\UUID;
 
 class CreatePostCommand
 {
     public function __construct(
-        private PostRepositoryInterface $postsRepository
+        private PostsRepositoryInterface $postsRepository
     )
     {
 

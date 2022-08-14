@@ -1,6 +1,6 @@
 <?php
 
-namespace Akseonov\Php2\Blog\UnitTests\Commands;
+namespace Akseonov\Php2\UnitTests\Blog\Commands;
 
 use Akseonov\Php2\Blog\Commands\Arguments;
 use Akseonov\Php2\Blog\Exceptions\ArgumentsException;
@@ -23,7 +23,7 @@ class ArgumentsTest extends TestCase
      */
     public function testItReturnsValuesAsStrings(): void
     {
-        $arguments = new Arguments(['some_key' => 123]);
+        $arguments = new Arguments(['some_key' => 123, 'empty_arg' => '']);
         $value = $arguments->get('some_key');
         $this->assertEquals('123', $value);
     }

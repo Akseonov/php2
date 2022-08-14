@@ -7,7 +7,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Akseonov\\Php2\\Blog\\UnitTests\\": "tests/"
+            "Akseonov\\Php2\\UnitTests\\": "tests/"
         }
     },
     "authors": [
