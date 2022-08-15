@@ -2,13 +2,13 @@
 
 namespace Akseonov\Php2\Blog;
 
-use Akseonov\Php2\Person\Person;
+use Akseonov\Php2\Blog\User;
 
 class Post
 {
     public function __construct(
         private UUID $uuid,
-        private UUID $authorUuid,
+        private User $user,
         private string $title,
         private string $text
     )
@@ -18,7 +18,7 @@ class Post
 
     public function __toString(): string
     {
-        return $this->uuid . ' пишет: ' . $this->title . PHP_EOL . $this->text;
+        return $this->user->getUsername() . ' пишет: ' . $this->title . PHP_EOL . $this->text;
     }
 
     /**
@@ -30,11 +30,11 @@ class Post
     }
 
     /**
-     * @return UUID
+     * @return User
      */
-    public function getAuthorUuid(): UUID
+    public function getUser(): User
     {
-        return $this->authorUuid;
+        return $this->user;
     }
 
     /**

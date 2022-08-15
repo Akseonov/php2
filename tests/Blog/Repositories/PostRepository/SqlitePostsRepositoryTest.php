@@ -6,7 +6,9 @@ use Akseonov\Php2\Blog\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Blog\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Blog\Post;
 use Akseonov\Php2\Blog\Repositories\PostsRepository\SqlitePostsRepository;
+use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Person\Name;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\TestCase;
@@ -57,6 +59,9 @@ class SqlitePostsRepositoryTest extends TestCase
             ->willReturn([
                 'uuid' => '123e4567-e89b-12d3-a456-426614174000',
                 'author_uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
+                'username' => 'username',
+                'first_name' => 'firstname',
+                'last_name' => 'lastname',
                 'title' => 'Мой дом',
                 'text' => 'Это мой рандомнй текст',
             ]);
@@ -65,15 +70,21 @@ class SqlitePostsRepositoryTest extends TestCase
 
         $result = $repository->getByTitle('Мой дом');
 
+        $user = new User(
+            new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
+            'username',
+            new Name('firstname', 'lastname')
+        );
+
         $this->assertEquals(new Post(
             new UUID('123e4567-e89b-12d3-a456-426614174000'),
-            new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
+            $user,
             'Мой дом',
             'Это мой рандомнй текст'
         ), $result);
 
         $this->assertEquals(
-            '123e4567-e89b-12d3-a456-426614174000 пишет: Мой дом' . PHP_EOL . 'Это мой рандомнй текст',
+            'username пишет: Мой дом' . PHP_EOL . 'Это мой рандомнй текст',
             (string)$result
         );
     }
@@ -102,6 +113,9 @@ class SqlitePostsRepositoryTest extends TestCase
             ->willReturn([
                 'uuid' => '123e4567-e89b-12d3-a456-426614174000',
                 'author_uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
+                'username' => 'username',
+                'first_name' => 'firstname',
+                'last_name' => 'lastname',
                 'title' => 'Мой дом',
                 'text' => 'Это мой рандомнй текст',
             ]);
@@ -110,15 +124,21 @@ class SqlitePostsRepositoryTest extends TestCase
 
         $result = $repository->get(new UUID('123e4567-e89b-12d3-a456-426614174000'));
 
+        $user = new User(
+            new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
+            'username',
+            new Name('firstname', 'lastname')
+        );
+
         $this->assertEquals(new Post(
             new UUID('123e4567-e89b-12d3-a456-426614174000'),
-            new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
+            $user,
             'Мой дом',
             'Это мой рандомнй текст'
         ), $result);
 
         $this->assertEquals(
-            '123e4567-e89b-12d3-a456-426614174000 пишет: Мой дом' . PHP_EOL . 'Это мой рандомнй текст',
+            'username пишет: Мой дом' . PHP_EOL . 'Это мой рандомнй текст',
             (string)$result
         );
     }
@@ -141,10 +161,16 @@ class SqlitePostsRepositoryTest extends TestCase
 
         $repository = new SqlitePostsRepository($connectionStub);
 
+        $user = new User(
+            new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
+            'username',
+            new Name('firstName', 'lastName')
+        );
+
         $repository->save(
             new Post(
                 new UUID('123e4567-e89b-12d3-a456-426614174000'),
-                new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
+                $user,
                 'Мой дом',
                 'Это мой рандомнй текст'
             )

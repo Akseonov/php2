@@ -6,7 +6,9 @@ use Akseonov\Php2\Blog\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Blog\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Blog\Post;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostsRepositoryInterface;
+use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Person\Name;
 
 class SqlitePostsRepository implements PostsRepositoryInterface
 {
@@ -28,9 +30,15 @@ class SqlitePostsRepository implements PostsRepositoryInterface
             );
         }
 
+        $user = new User(
+            new UUID($result['author_uuid']),
+            $result['username'],
+            new Name($result['first_name'], $result['last_name'])
+        );
+
         return new Post(
             new UUID($result['uuid']),
-            new UUID($result['author_uuid']),
+            $user,
             $result['title'],
             $result['text']
         );
@@ -46,7 +54,7 @@ class SqlitePostsRepository implements PostsRepositoryInterface
         // Выполняем запрос с конкретными значениями
         $statement->execute([
             ':uuid' => (string)$post->getUuid(),
-            ':author_uuid' => (string)$post->getAuthorUuid(),
+            ':author_uuid' => (string)$post->getUser()->getUuid(),
             ':title' => $post->getTitle(),
             ':text' => $post->getText(),
         ]);
@@ -59,28 +67,16 @@ class SqlitePostsRepository implements PostsRepositoryInterface
     public function get(UUID $uuid): Post
     {
         $statement = $this->connection->prepare(
-            'SELECT * FROM posts WHERE uuid = :uuid'
+            'SELECT * 
+                    FROM posts LEFT JOIN users
+                    ON posts.author_uuid = users.uuid
+                    WHERE posts.uuid = :uuid'
         );
         $statement->execute([
             ':uuid' => (string)$uuid,
         ]);
 
         return $this->getPost($statement, $uuid);
-//        $result = $statement->fetch(\PDO::FETCH_ASSOC);
-//
-//        // Бросаем исключение, если пользователь не найден
-//        if ($result === false) {
-//            throw new PostNotFoundException(
-//                "Cannot get post: $uuid"
-//            );
-//        }
-//
-//        return new Post(
-//            new UUID($result['uuid']),
-//            new UUID($result['author_uuid']),
-//            $result['title'],
-//            $result['text']
-//        );
     }
 
     /**
@@ -90,7 +86,10 @@ class SqlitePostsRepository implements PostsRepositoryInterface
     public function getByTitle(string $title): Post
     {
         $statement = $this->connection->prepare(
-            'SELECT * FROM posts WHERE title = :title'
+            'SELECT * 
+                    FROM posts LEFT JOIN users
+                    ON posts.author_uuid = users.uuid
+                    WHERE posts.title = :title'
         );
 
         $statement->execute([

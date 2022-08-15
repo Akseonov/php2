@@ -60,4 +60,17 @@ class ArgumentsTest extends TestCase
         $value = $arguments->get('some_key');
         $this->assertEquals($expectedValue, $value);
     }
+
+    public function testItConvertCommandStringToArguments(): void
+    {
+        $arguments = Arguments::fromArgv([
+            'author_uuid=a3e78b09-23ae-44fd-9939-865f688894f5',
+            'text',
+            'post_uuid='
+        ]);
+
+        $this->assertEquals(new Arguments([
+            'author_uuid' => 'a3e78b09-23ae-44fd-9939-865f688894f5',
+        ]), $arguments);
+    }
 }
