@@ -2,11 +2,11 @@
 
 namespace Akseonov\Php2\UnitTests\Blog\Repositories\UserRepository;
 
-use Akseonov\Php2\Blog\Exceptions\InvalidArgumentException;
-use Akseonov\Php2\Blog\Exceptions\UserNotFoundException;
 use Akseonov\Php2\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Exceptions\InvalidArgumentException;
+use Akseonov\Php2\Exceptions\UserNotFoundException;
 use Akseonov\Php2\Person\Name;
 use PDO;
 use PDOStatement;

@@ -5,15 +5,14 @@ namespace Akseonov\Php2\UnitTests\Blog\Commands;
 use Akseonov\Php2\Blog\Commands\Arguments;
 use Akseonov\Php2\Blog\Commands\CreateCommentCommand;
 use Akseonov\Php2\Blog\Comment;
-use Akseonov\Php2\Blog\Exceptions\ArgumentsException;
-use Akseonov\Php2\Blog\Exceptions\CommandException;
-use Akseonov\Php2\Blog\Exceptions\CommentNotFoundException;
 use Akseonov\Php2\Blog\Post;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\CommentsRepositoryInterface;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostsRepositoryInterface;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\UsersRepositoryInterface;
 use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Exceptions\ArgumentsException;
+use Akseonov\Php2\Exceptions\CommentNotFoundException;
 use Akseonov\Php2\Person\Name;
 use PHPUnit\Framework\TestCase;
 

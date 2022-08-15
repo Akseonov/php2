@@ -2,10 +2,11 @@
 
 namespace Akseonov\Php2\Blog\Repositories\UsersRepository;
 
-use Akseonov\Php2\Blog\Exceptions\{InvalidArgumentException, UserNotFoundException};
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\UsersRepositoryInterface;
 use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Exceptions\{UserNotFoundException};
+use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Person\Name;
 
 class SqliteUsersRepository implements UsersRepositoryInterface

@@ -3,10 +3,9 @@
 namespace Akseonov\Php2\Blog\Commands;
 
 use Akseonov\Php2\Blog\Comment;
-use Akseonov\Php2\Blog\Exceptions\ArgumentsException;
-use Akseonov\Php2\Blog\Exceptions\InvalidArgumentException;
-use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\CommentsRepositoryInterface;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Exceptions\ArgumentsException;
+use Akseonov\Php2\Exceptions\InvalidArgumentException;
 
 class CreateCommentCommand
 {

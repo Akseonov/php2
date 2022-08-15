@@ -2,12 +2,12 @@
 
 namespace Akseonov\Php2\UnitTests\Blog\Repositories\PostRepository;
 
-use Akseonov\Php2\Blog\Exceptions\InvalidArgumentException;
-use Akseonov\Php2\Blog\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Blog\Post;
 use Akseonov\Php2\Blog\Repositories\PostsRepository\SqlitePostsRepository;
 use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Exceptions\InvalidArgumentException;
+use Akseonov\Php2\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Person\Name;
 use PDO;
 use PDOStatement;

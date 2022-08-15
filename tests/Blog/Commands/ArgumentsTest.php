@@ -3,7 +3,7 @@
 namespace Akseonov\Php2\UnitTests\Blog\Commands;
 
 use Akseonov\Php2\Blog\Commands\Arguments;
-use Akseonov\Php2\Blog\Exceptions\ArgumentsException;
+use Akseonov\Php2\Exceptions\ArgumentsException;
 use PHPUnit\Framework\TestCase;
 
 class ArgumentsTest extends TestCase

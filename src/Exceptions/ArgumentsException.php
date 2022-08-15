@@ -1,6 +1,6 @@
 <?php
 
-namespace Akseonov\Php2\Blog\Exceptions;
+namespace Akseonov\Php2\Exceptions;
 
 class ArgumentsException extends \Exception
 {

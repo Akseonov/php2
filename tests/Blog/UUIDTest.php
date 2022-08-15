@@ -2,8 +2,8 @@
 
 namespace Akseonov\Php2\UnitTests\Blog;
 
-use Akseonov\Php2\Blog\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 class UUIDTest extends TestCase

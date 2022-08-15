@@ -2,7 +2,7 @@
 
 namespace Akseonov\Php2\Blog\Commands;
 
-use Akseonov\Php2\Blog\Exceptions\ArgumentsException;
+use Akseonov\Php2\Exceptions\ArgumentsException;
 
 class Arguments
 {

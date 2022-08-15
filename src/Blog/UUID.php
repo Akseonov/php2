@@ -2,7 +2,7 @@
 
 namespace Akseonov\Php2\Blog;
 
-use Akseonov\Php2\Blog\Exceptions\InvalidArgumentException;
+use Akseonov\Php2\Exceptions\InvalidArgumentException;
 
 class UUID
 {

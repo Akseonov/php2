@@ -18,12 +18,12 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 $connection = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
 
-$usersRepository = new SqliteUsersRepository($connection);
+//$usersRepository = new SqliteUsersRepository($connection);
 //$usersRepository = new InMemoryUsersRepository();
 //$commandUser = new CreateUserCommand($usersRepository);
 
 
-$postsRepository = new SqlitePostsRepository($connection);
+//$postsRepository = new SqlitePostsRepository($connection);
 //$commandPost = new CreatePostCommand([
 //    'posts_repository' => $postsRepository,
 //    'users_repository' => $usersRepository,
@@ -31,11 +31,11 @@ $postsRepository = new SqlitePostsRepository($connection);
 
 
 $commentsRepository = new SqliteCommentsRepository($connection);
-$commandComment = new CreateCommentCommand([
-    'comments_repository' => $commentsRepository,
-    'posts_repository' => $postsRepository,
-    'users_repository' => $usersRepository,
-]);
+//$commandComment = new CreateCommentCommand([
+//    'comments_repository' => $commentsRepository,
+//    'posts_repository' => $postsRepository,
+//    'users_repository' => $usersRepository,
+//]);
 
 try {
     $faker = Faker\Factory::create('Ru_RU');
@@ -60,10 +60,10 @@ try {
 //    echo $postsRepository->getByTitle('Имя мне Моисей');
 
 
-    $commandComment->handle(Arguments::fromArgv($argv));
+//    $commandComment->handle(Arguments::fromArgv($argv));
 
 //    $commentsRepository->save(new Comment(UUID::random(), UUID::random(), UUID::random(), $faker->realText(rand(50, 100))));
-//    echo $commentsRepository->get(new UUID('b63ec77a-9eca-4560-a3fa-c061704a13cd'));
+    echo $commentsRepository->get(new UUID('b63ec77a-9eca-4560-a3fa-c061704a13cd'));
 } catch (Exception $exception) {
     echo $exception->getMessage();
 }
