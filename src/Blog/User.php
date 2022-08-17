@@ -29,9 +29,9 @@ class User
     /**
      * @return UUID
      */
-    public function getUuid(): UUID
+    public function getUuid(): string
     {
-        return $this->uuid;
+        return (string)$this->uuid;
     }
 
     /**

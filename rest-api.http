@@ -1,0 +1,94 @@
+GET http://localhost:80/users/id?uuid=6159f29f-9f6d-4b01-a022-cb0519a11ddd
+Accept: application/json
+Cookie: XDEBUG_SESSION=start
+
+<> 2022-08-16T153701.200.json
+<> 2022-08-16T153531.200.json
+<> 2022-08-16T153142.200.json
+<> 2022-08-16T153015.200.json
+<> 2022-08-16T152958.200.json
+<> 2022-08-16T152731.200.json
+<> 2022-08-16T152700.200.json
+<> 2022-08-16T152651.200.json
+<> 2022-08-16T151223.200.json
+<> 2022-08-16T151038.200.json
+
+###
+
+GET http://localhost:80/users/show?username=admin
+Accept: application/json
+Cookie: XDEBUG_SESSION=start
+
+<> 2022-08-16T153857.200.json
+
+###
+
+GET http://localhost:80/posts/id?uuid=72ba514a-5205-4876-a1a2-a16a61c0198a
+Accept: application/json
+Cookie: XDEBUG_SESSION=start
+
+<> 2022-08-16T161318.200.json
+<> 2022-08-16T161259.200.html
+<> 2022-08-16T160606.200.html
+<> 2022-08-16T160440.200.json
+<> 2022-08-16T153948.200.json
+<> 2022-08-16T153936.200.json
+
+###
+
+GET http://localhost:80/posts/show?title=Привет
+Accept: application/json
+Cookie: XDEBUG_SESSION=start
+
+<> 2022-08-16T161605.200.json
+<> 2022-08-16T161446.200.html
+<> 2022-08-16T161339.200.json
+<> 2022-08-16T154619.200.json
+
+###
+
+GET http://localhost:80/comments/id?uuid=41f40601-5b3f-48ba-9530-efa67389227d
+Accept: application/json
+Cookie: XDEBUG_SESSION=start
+
+<> 2022-08-16T165421.200.json
+<> 2022-08-16T165408.200.json
+
+###
+
+POST http://localhost:80/posts/create
+Accept: application/json
+Cookie: XDEBUG_SESSION=start
+
+{
+"author_uuid": "10373537-0805-4d7a-830e-22b481b4859c",
+"title": "Заголовок для удаления",
+"text": "Текст для удаления"
+}
+
+<> 2022-08-16T162203.200.json
+<> 2022-08-16T162142.200.json
+
+###
+
+POST http://localhost:80/comments/create
+Accept: application/json
+Cookie: XDEBUG_SESSION=start
+
+{
+"author_uuid": "a3e78b09-23ae-44fd-9939-865f688894f5",
+"post_uuid": "56c541f7-6665-4e67-8e0d-41e544855b6d",
+"text": "Мой новый коммент для эшена"
+}
+
+<> 2022-08-16T170632.200.json
+
+###
+
+POST http://localhost:80/posts/delete
+Accept: application/json
+Cookie: XDEBUG_SESSION=start
+
+{
+"uuid": "fd02bf59-8f28-4475-a943-ef59dd12d73f"
+}

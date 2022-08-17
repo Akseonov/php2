@@ -36,6 +36,10 @@ class CreatePostCommandTest extends TestCase
             {
                 throw new PostNotFoundException("Not found");
             }
+
+            public function delete(UUID $uuid): void
+            {
+            }
         };
     }
 
@@ -78,6 +82,10 @@ class CreatePostCommandTest extends TestCase
                     'Мой дом',
                     'Это мой рандомнй текст'
                 );
+            }
+
+            public function delete(UUID $uuid): void
+            {
             }
         };
     }
@@ -212,6 +220,10 @@ class CreatePostCommandTest extends TestCase
             public function wasCalled(): bool
             {
                 return $this->called;
+            }
+
+            public function delete(UUID $uuid): void
+            {
             }
         };
 

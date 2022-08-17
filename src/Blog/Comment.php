@@ -19,11 +19,11 @@ class Comment
     }
 
     /**
-     * @return UUID
+     * @return string
      */
-    public function getUuid(): UUID
+    public function getUuid(): string
     {
-        return $this->uuid;
+        return (string)$this->uuid;
     }
 
     /**

@@ -176,4 +176,24 @@ class SqlitePostsRepositoryTest extends TestCase
             )
         );
     }
+
+    public function testItDeletePostFromDatabase(): void
+    {
+        $connectionStub = $this->createStub(PDO::class);
+        $statementMock = $this->createMock(PDOStatement::class);
+
+        $statementMock
+            ->expects($this->once())
+            ->method('execute')
+            ->with([
+                ':uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
+            ]);
+        $connectionStub->method('prepare')->willReturn($statementMock);
+
+        $repository = new SqlitePostsRepository($connectionStub);
+
+        $repository->delete(
+            new UUID('9de6281b-6fa3-427b-b071-4ca519586e74')
+        );
+    }
 }

@@ -46,12 +46,11 @@ class SqlitePostsRepository implements PostsRepositoryInterface
 
     public function save(Post $post): void
     {
-        // Подготавливаем запрос
         $statement = $this->connection->prepare(
             'INSERT INTO posts (uuid, author_uuid, title, text)
             VALUES (:uuid, :author_uuid, :title, :text)'
         );
-        // Выполняем запрос с конкретными значениями
+
         $statement->execute([
             ':uuid' => (string)$post->getUuid(),
             ':author_uuid' => (string)$post->getUser()->getUuid(),
@@ -67,7 +66,7 @@ class SqlitePostsRepository implements PostsRepositoryInterface
     public function get(UUID $uuid): Post
     {
         $statement = $this->connection->prepare(
-            'SELECT * 
+            'SELECT posts.*, users.username, users.first_name, users.last_name 
                     FROM posts LEFT JOIN users
                     ON posts.author_uuid = users.uuid
                     WHERE posts.uuid = :uuid'
@@ -86,7 +85,7 @@ class SqlitePostsRepository implements PostsRepositoryInterface
     public function getByTitle(string $title): Post
     {
         $statement = $this->connection->prepare(
-            'SELECT * 
+            'SELECT posts.*, users.username, users.first_name, users.last_name 
                     FROM posts LEFT JOIN users
                     ON posts.author_uuid = users.uuid
                     WHERE posts.title = :title'
@@ -96,5 +95,16 @@ class SqlitePostsRepository implements PostsRepositoryInterface
             ':title' => $title,
         ]);
         return $this->getPost($statement, $title);
+    }
+
+    public function delete(UUID $uuid): void
+    {
+        $statement = $this->connection->prepare(
+            'DELETE FROM posts WHERE posts.uuid=:uuid;'
+        );
+
+        $statement->execute([
+            ':uuid' => $uuid,
+        ]);
     }
 }

@@ -84,7 +84,7 @@ class Request
     }
 
     /**
-     * @throws HttpException|JsonException
+     * @throws HttpException
      */
     public function jsonBody(): array
     {
@@ -94,7 +94,7 @@ class Request
                 associative: true,
                 flags: JSON_THROW_ON_ERROR
             );
-        } catch (JsonException) {
+        } catch (\JsonException) {
             throw new HttpException('Cannot decode json body');
         }
 

@@ -74,6 +74,10 @@ class CreateCommentCommandTest extends TestCase
                     'Это мой рандомнй текст'
                 );
             }
+
+            public function delete(UUID $uuid): void
+            {
+            }
         };
     }
 
