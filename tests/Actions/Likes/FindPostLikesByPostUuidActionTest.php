@@ -1,45 +1,52 @@
 <?php
 
-namespace Akseonov\Php2\UnitTests\Actions\Comments;
+namespace Akseonov\Php2\UnitTests\Actions\Likes;
 
-use Akseonov\Php2\Actions\Comments\FindCommentByUuid;
-use Akseonov\Php2\Blog\Comment;
+use Akseonov\Php2\Actions\Likes\FindPostLikesByPostUuid;
 use Akseonov\Php2\Blog\Post;
-use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\CommentsRepositoryInterface;
+use Akseonov\Php2\Blog\PostLike;
+use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostLikesRepositoryInterface;
 use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
-use Akseonov\Php2\Exceptions\CommentNotFoundException;
+use Akseonov\Php2\Exceptions\LikesPostNotFoundException;
 use Akseonov\Php2\http\ErrorResponse;
 use Akseonov\Php2\http\Request;
 use Akseonov\Php2\http\SuccessfulResponse;
 use Akseonov\Php2\Person\Name;
-use PHPUnit\Framework\TestCase;
 use JsonException;
+use PHPUnit\Framework\TestCase;
 
-class FindCommentByUuidActionTest extends TestCase
+class FindPostLikesByPostUuidActionTest extends TestCase
 {
-    private function commentsRepository(array $comments): CommentsRepositoryInterface
+    private function postLikesRepository(array $likes): PostLikesRepositoryInterface
     {
-        return new class($comments) implements CommentsRepositoryInterface
+        return new class($likes) implements PostLikesRepositoryInterface
         {
             public function __construct(
-                private array $comments
+                private array $likes
             )
             {
             }
 
-            public function save(Comment $comment): void
+            public function save(PostLike $postLike): void
             {
             }
 
-            public function get(UUID $uuid): Comment
+            public function getByPostUuid(UUID $uuid): array
             {
-                foreach ($this->comments as $comment) {
-                    if ($comment instanceof Comment && (string)$uuid === $comment->getUuid()) {
-                        return $comment;
+                $likes = [];
+
+                foreach ($this->likes as $like) {
+                    if ($like instanceof PostLike && (string)$uuid === $like->getUuid()) {
+                        $likes[] = $like;
                     }
                 }
-                throw new CommentNotFoundException('Not found');
+
+                if (!empty($likes)) {
+                    return $likes;
+                }
+
+                throw new LikesPostNotFoundException('Not found');
             }
         };
     }
@@ -54,9 +61,9 @@ class FindCommentByUuidActionTest extends TestCase
 
         $request = new Request([], [], '');
 
-        $repository = $this->commentsRepository([]);
+        $repository = $this->postLikesRepository([]);
 
-        $action = new FindCommentByUuid($repository);
+        $action = new FindPostLikesByPostUuid($repository);
 
         $response = $action->handle($request);
 
@@ -71,15 +78,15 @@ class FindCommentByUuidActionTest extends TestCase
      * @preserveGlobalState disabled
      * @throws JsonException
      */
-    public function testItReturnsErrorResponseIfCommentNotFound(): void
+    public function testItReturnsErrorResponseIfPostLikesNotFound(): void
     {
         $request = new Request([
             'uuid' => 'a3e78b09-23ae-44fd-9939-865f688894f5'
         ], [], '');
 
-        $repository = $this->commentsRepository([]);
+        $repository = $this->postLikesRepository([]);
 
-        $action = new FindCommentByUuid($repository);
+        $action = new FindPostLikesByPostUuid($repository);
 
         $response = $action->handle($request);
 
@@ -100,9 +107,9 @@ class FindCommentByUuidActionTest extends TestCase
             'uuid' => 'a3e78b09-23ae-44fd'
         ], [], '');
 
-        $repository = $this->commentsRepository([]);
+        $repository = $this->postLikesRepository([]);
 
-        $action = new FindCommentByUuid($repository);
+        $action = new FindPostLikesByPostUuid($repository);
 
         $response = $action->handle($request);
 
@@ -136,21 +143,20 @@ class FindCommentByUuidActionTest extends TestCase
             'text'
         );
 
-        $repository = $this->commentsRepository([
-            new Comment(
+        $repository = $this->postLikesRepository([
+            new PostLike(
                 new UUID('2ef8f342-6a5c-4e7c-b39f-5d688f0fce10'),
                 $post,
                 $user,
-                'text'
             )
         ]);
 
-        $action = new FindCommentByUuid($repository);
+        $action = new FindPostLikesByPostUuid($repository);
 
         $response = $action->handle($request);
 
         $this->assertInstanceOf(SuccessfulResponse::class, $response);
-        $this->expectOutputString('{"success":true,"data":{"uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10","user":{"uuid":"10373537-0805-4d7a-830e-22b481b4859c","username":"username","first_name":"name","last_name":"surname"},"post":{"uuid":"a3e78b09-23ae-44fd-9939-865f688894f5","user":{"uuid":"10373537-0805-4d7a-830e-22b481b4859c","username":"username","first_name":"name","last_name":"surname"},"title":"title","text":"text"},"text":"text"}}');
+        $this->expectOutputString('{"success":true,"data":[{"uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10","post":{"uuid":"a3e78b09-23ae-44fd-9939-865f688894f5","user":{"uuid":"10373537-0805-4d7a-830e-22b481b4859c","username":"username","first_name":"name","last_name":"surname"},"title":"title","text":"text"},"user":{"uuid":"10373537-0805-4d7a-830e-22b481b4859c","username":"username","first_name":"name","last_name":"surname"}}]}');
 
         $response->send();
     }

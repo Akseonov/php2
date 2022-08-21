@@ -8,6 +8,7 @@ use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
 use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Exceptions\PostNotFoundException;
+use Akseonov\Php2\Exceptions\UserNotFoundException;
 use Akseonov\Php2\Person\Name;
 use PDO;
 use PDOStatement;
@@ -18,6 +19,7 @@ class SqlitePostsRepositoryTest extends TestCase
     /**
      * @throws InvalidArgumentException
      * @throws PostNotFoundException
+     * @throws UserNotFoundException
      */
     public function testItThrowsAnExceptionWhenPostNotFound(): void
     {
@@ -38,6 +40,7 @@ class SqlitePostsRepositoryTest extends TestCase
     /**
      * @throws InvalidArgumentException
      * @throws PostNotFoundException
+     * @throws UserNotFoundException
      */
     public function testItReturnPostObjectByTitle(): void
     {
@@ -45,25 +48,39 @@ class SqlitePostsRepositoryTest extends TestCase
         $statementMock = $this->createMock(PDOStatement::class);
 
         $statementMock
-            ->expects($this->once())
+            ->expects($this->at(0))
             ->method('execute')
             ->with([
                 ':title' => 'Мой дом',
             ]);
 
+        $statementMock
+            ->expects($this->at(2))
+            ->method('execute')
+            ->with([
+                ':uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
+            ]);
+
         $connectionMock->method('prepare')->willReturn($statementMock);
 
         $statementMock
-            ->expects($this->once())
+            ->expects($this->at(1))
             ->method('fetch')
             ->willReturn([
                 'uuid' => '123e4567-e89b-12d3-a456-426614174000',
                 'author_uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
+                'title' => 'Мой дом',
+                'text' => 'Это мой рандомнй текст',
+            ]);
+
+        $statementMock
+            ->expects($this->at(3))
+            ->method('fetch')
+            ->willReturn([
+                'uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
                 'username' => 'username',
                 'first_name' => 'firstname',
                 'last_name' => 'lastname',
-                'title' => 'Мой дом',
-                'text' => 'Это мой рандомнй текст',
             ]);
 
         $repository = new SqlitePostsRepository($connectionMock);
@@ -92,6 +109,7 @@ class SqlitePostsRepositoryTest extends TestCase
     /**
      * @throws InvalidArgumentException
      * @throws PostNotFoundException
+     * @throws UserNotFoundException
      */
     public function testItReturnPostObjectByUuid(): void
     {
@@ -99,25 +117,39 @@ class SqlitePostsRepositoryTest extends TestCase
         $statementMock = $this->createMock(PDOStatement::class);
 
         $statementMock
-            ->expects($this->once())
+            ->expects($this->at(0))
             ->method('execute')
             ->with([
                 ':uuid' => '123e4567-e89b-12d3-a456-426614174000',
             ]);
 
+        $statementMock
+            ->expects($this->at(2))
+            ->method('execute')
+            ->with([
+                ':uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
+            ]);
+
         $connectionMock->method('prepare')->willReturn($statementMock);
 
         $statementMock
-            ->expects($this->once())
+            ->expects($this->at(1))
             ->method('fetch')
             ->willReturn([
                 'uuid' => '123e4567-e89b-12d3-a456-426614174000',
                 'author_uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
+                'title' => 'Мой дом',
+                'text' => 'Это мой рандомнй текст',
+            ]);
+
+        $statementMock
+            ->expects($this->at(3))
+            ->method('fetch')
+            ->willReturn([
+                'uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
                 'username' => 'username',
                 'first_name' => 'firstname',
                 'last_name' => 'lastname',
-                'title' => 'Мой дом',
-                'text' => 'Это мой рандомнй текст',
             ]);
 
         $repository = new SqlitePostsRepository($connectionMock);

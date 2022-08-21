@@ -37,12 +37,14 @@ class FindPostByUuid implements ActionInterface
 
         return new SuccessfulResponse([
             'uuid' => $post->getUuid(),
-            'author_uuid' => $post->getUser()->getUuid(),
+            'user' => [
+                'uuid' => $post->getUser()->getUuid(),
+                'username' => $post->getUser()->getUsername(),
+                'first_name' => $post->getUser()->getName()->getFirstName(),
+                'last_name' => $post->getUser()->getName()->getLastName(),
+            ],
             'title' => $post->getTitle(),
             'text' => $post->getText(),
-            'username' => $post->getUser()->getUsername(),
-            'first_name' => $post->getUser()->getName()->getFirstName(),
-            'last_name' => $post->getUser()->getName()->getLastName(),
         ]);
     }
 }

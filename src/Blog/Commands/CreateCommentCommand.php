@@ -30,7 +30,6 @@ class CreateCommentCommand
             new UUID($arguments->get('author_uuid'))
         );
 
-        // Сохраняем пользователя в репозиторий
         $this->repositories['comments_repository']->save(new Comment(
             UUID::random(),
             $post,

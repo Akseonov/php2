@@ -24,6 +24,7 @@ class SqliteUsersRepository implements UsersRepositoryInterface
     private function getUser(\PDOStatement $statement, string $userInfo): User
     {
         $result = $statement->fetch(\PDO::FETCH_ASSOC);
+
         if ($result === false) {
             throw new UserNotFoundException(
                 "Cannot get user: $userInfo"
@@ -39,12 +40,11 @@ class SqliteUsersRepository implements UsersRepositoryInterface
 
     public function save(User $user): void
     {
-    // Подготавливаем запрос
         $statement = $this->connection->prepare(
             'INSERT INTO users (uuid, username, first_name, last_name)
             VALUES (:uuid, :username, :first_name, :last_name)'
         );
-    // Выполняем запрос с конкретными значениями
+
         $statement->execute([
             ':first_name' => $user->getName()->getFirstName(),
             ':last_name' => $user->getName()->getLastName(),
@@ -62,6 +62,7 @@ class SqliteUsersRepository implements UsersRepositoryInterface
         $statement = $this->connection->prepare(
             'SELECT * FROM users WHERE uuid = :uuid'
         );
+
         $statement->execute([
             ':uuid' => (string)$uuid,
         ]);
@@ -82,6 +83,7 @@ class SqliteUsersRepository implements UsersRepositoryInterface
         $statement->execute([
             ':username' => $username,
         ]);
+
         return $this->getUser($statement, $username);
     }
 }

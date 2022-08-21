@@ -48,7 +48,6 @@ class SqliteUsersRepositoryTest extends TestCase
             ->with([
                 ':username' => 'ivan123',
             ]);
-//        $connectionMock->method('prepare')->willReturn($statementMock);
 
         $connectionMock->method('prepare')->willReturn($statementMock);
 

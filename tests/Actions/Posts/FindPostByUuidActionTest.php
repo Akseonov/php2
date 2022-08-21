@@ -48,7 +48,6 @@ class FindPostByUuidActionTest extends TestCase
 
             public function delete(UUID $uuid): void
             {
-                // TODO: Implement delete() method.
             }
         };
     }
@@ -152,7 +151,7 @@ class FindPostByUuidActionTest extends TestCase
         $response = $action->handle($request);
 
         $this->assertInstanceOf(SuccessfulResponse::class, $response);
-        $this->expectOutputString('{"success":true,"data":{"uuid":"a3e78b09-23ae-44fd-9939-865f688894f5","author_uuid":"10373537-0805-4d7a-830e-22b481b4859c","title":"title","text":"text","username":"username","first_name":"name","last_name":"surname"}}');
+        $this->expectOutputString('{"success":true,"data":{"uuid":"a3e78b09-23ae-44fd-9939-865f688894f5","user":{"uuid":"10373537-0805-4d7a-830e-22b481b4859c","username":"username","first_name":"name","last_name":"surname"},"title":"title","text":"text"}}');
 
         $response->send();
     }

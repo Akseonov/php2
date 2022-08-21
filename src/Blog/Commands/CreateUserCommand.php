@@ -12,8 +12,6 @@ use Akseonov\Php2\Person\Name;
 
 class CreateUserCommand
 {
-    // Команда зависит от контракта репозитория пользователей,
-// а не от конкретной реализации
     public function __construct(
         private UsersRepositoryInterface $usersRepository
     )
@@ -29,12 +27,9 @@ class CreateUserCommand
     {
         $username = $arguments->get('username');
 
-        // Проверяем, существует ли пользователь в репозитории
         if ($this->userExists($username)) {
-            // Бросаем исключение, если пользователь уже существует
             throw new CommandException("User already exists: $username");
         }
-        // Сохраняем пользователя в репозиторий
         $this->usersRepository->save(new User(
             UUID::random(),
             $username,
@@ -45,7 +40,6 @@ class CreateUserCommand
     private function userExists(string $username): bool
     {
         try {
-        // Пытаемся получить пользователя из репозитория
             $this->usersRepository->getByUsername($username);
         } catch (UserNotFoundException) {
             return false;

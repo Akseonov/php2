@@ -4,37 +4,37 @@ namespace Akseonov\Php2\Blog\Repositories\PostsRepository;
 
 use Akseonov\Php2\Blog\Post;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostsRepositoryInterface;
-use Akseonov\Php2\Blog\User;
+use Akseonov\Php2\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use Akseonov\Php2\Blog\UUID;
 use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Exceptions\PostNotFoundException;
-use Akseonov\Php2\Person\Name;
+use Akseonov\Php2\Exceptions\UserNotFoundException;
 
 class SqlitePostsRepository implements PostsRepositoryInterface
 {
     public function __construct(
-        private \PDO $connection,
+        private readonly \PDO $connection,
     )
     {
     }
 
     /**
      * @throws InvalidArgumentException|PostNotFoundException
+     * @throws UserNotFoundException
      */
     private function getPost(\PDOStatement $statement, string $postInfo): Post
     {
         $result = $statement->fetch(\PDO::FETCH_ASSOC);
+
         if ($result === false) {
             throw new PostNotFoundException(
                 "Cannot get post: $postInfo"
             );
         }
 
-        $user = new User(
-            new UUID($result['author_uuid']),
-            $result['username'],
-            new Name($result['first_name'], $result['last_name'])
-        );
+        $userRepository = new SqliteUsersRepository($this->connection);
+
+        $user = $userRepository->get(new UUID($result['author_uuid']));
 
         return new Post(
             new UUID($result['uuid']),
@@ -62,15 +62,14 @@ class SqlitePostsRepository implements PostsRepositoryInterface
     /**
      * @throws InvalidArgumentException
      * @throws PostNotFoundException
+     * @throws UserNotFoundException
      */
     public function get(UUID $uuid): Post
     {
         $statement = $this->connection->prepare(
-            'SELECT posts.*, users.username, users.first_name, users.last_name 
-                    FROM posts LEFT JOIN users
-                    ON posts.author_uuid = users.uuid
-                    WHERE posts.uuid = :uuid'
+            'SELECT * FROM posts WHERE uuid = :uuid'
         );
+
         $statement->execute([
             ':uuid' => (string)$uuid,
         ]);
@@ -81,19 +80,18 @@ class SqlitePostsRepository implements PostsRepositoryInterface
     /**
      * @throws InvalidArgumentException
      * @throws PostNotFoundException
+     * @throws UserNotFoundException
      */
     public function getByTitle(string $title): Post
     {
         $statement = $this->connection->prepare(
-            'SELECT posts.*, users.username, users.first_name, users.last_name 
-                    FROM posts LEFT JOIN users
-                    ON posts.author_uuid = users.uuid
-                    WHERE posts.title = :title'
+            'SELECT * FROM posts WHERE title = :title'
         );
 
         $statement->execute([
             ':title' => $title,
         ]);
+
         return $this->getPost($statement, $title);
     }
 

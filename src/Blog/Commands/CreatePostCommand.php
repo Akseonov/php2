@@ -27,9 +27,7 @@ class CreatePostCommand
     {
         $title = $arguments->get('title');
 
-        // Проверяем, существует ли пользователь в репозитории
         if ($this->postExists($title)) {
-            // Бросаем исключение, если пользователь уже существует
             throw new CommandException("Post already exists: $title");
         }
 
@@ -37,7 +35,6 @@ class CreatePostCommand
             new UUID($arguments->get('author_uuid'))
         );
 
-        // Сохраняем пользователя в репозиторий
         $this->repositories['posts_repository']->save(new Post(
             UUID::random(),
             $user,
@@ -49,7 +46,6 @@ class CreatePostCommand
     private function postExists(string $title): bool
     {
         try {
-            // Пытаемся получить пользователя из репозитория
             $this->repositories['posts_repository']->getByTitle($title);
         } catch (PostNotFoundException) {
             return false;
