@@ -16,7 +16,7 @@ use Akseonov\Php2\http\SuccessfulResponse;
 class FindUserByUuid implements ActionInterface
 {
     public function __construct(
-        private UsersRepositoryInterface $usersRepository
+        private readonly UsersRepositoryInterface $usersRepository
     )
     {
     }

@@ -16,7 +16,7 @@ use Akseonov\Php2\http\SuccessfulResponse;
 class FindCommentByUuid implements ActionInterface
 {
     public function __construct(
-        private CommentsRepositoryInterface $commentsRepository
+        private readonly CommentsRepositoryInterface $commentsRepository
     )
     {
     }

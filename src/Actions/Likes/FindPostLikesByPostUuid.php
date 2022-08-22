@@ -4,8 +4,6 @@ namespace Akseonov\Php2\Actions\Likes;
 
 use Akseonov\Php2\Actions\ActionInterface;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostLikesRepositoryInterface;
-use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostsRepositoryInterface;
-use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\UsersRepositoryInterface;
 use Akseonov\Php2\Blog\UUID;
 use Akseonov\Php2\Exceptions\HttpException;
 use Akseonov\Php2\Exceptions\InvalidArgumentException;
@@ -20,7 +18,7 @@ use Akseonov\Php2\http\SuccessfulResponse;
 class FindPostLikesByPostUuid implements ActionInterface
 {
     public function __construct(
-        private PostLikesRepositoryInterface $postLikesRepository,
+        private readonly PostLikesRepositoryInterface $postLikesRepository,
     )
     {
     }

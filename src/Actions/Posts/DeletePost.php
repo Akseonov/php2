@@ -16,7 +16,7 @@ use Akseonov\Php2\http\Response;
 class DeletePost implements ActionInterface
 {
     public function __construct(
-        private PostsRepositoryInterface $postsRepository,
+        private readonly PostsRepositoryInterface $postsRepository,
     )
     {
     }

@@ -20,9 +20,9 @@ use Akseonov\Php2\http\SuccessfulResponse;
 class CreatePostLike implements ActionInterface
 {
     public function __construct(
-        private PostLikesRepositoryInterface $postLikesRepository,
-        private PostsRepositoryInterface $postsRepository,
-        private UsersRepositoryInterface $usersRepository
+        private readonly PostLikesRepositoryInterface $postLikesRepository,
+        private readonly PostsRepositoryInterface $postsRepository,
+        private readonly UsersRepositoryInterface $usersRepository
     )
     {
     }

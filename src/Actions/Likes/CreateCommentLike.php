@@ -1,27 +1,27 @@
 <?php
 
-namespace Akseonov\Php2\Actions\Comments;
+namespace Akseonov\Php2\Actions\Likes;
 
 use Akseonov\Php2\Actions\ActionInterface;
-use Akseonov\Php2\Blog\Comment;
+use Akseonov\Php2\Blog\CommentLike;
+use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\CommentLikesRepositoryInterface;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\CommentsRepositoryInterface;
-use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostsRepositoryInterface;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\UsersRepositoryInterface;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Exceptions\CommentNotFoundException;
 use Akseonov\Php2\Exceptions\HttpException;
 use Akseonov\Php2\Exceptions\InvalidArgumentException;
-use Akseonov\Php2\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
 use Akseonov\Php2\http\ErrorResponse;
 use Akseonov\Php2\http\Request;
 use Akseonov\Php2\http\Response;
 use Akseonov\Php2\http\SuccessfulResponse;
 
-class CreateComment implements ActionInterface
+class CreateCommentLike implements ActionInterface
 {
     public function __construct(
+        private readonly CommentLikesRepositoryInterface $commentLikesRepository,
         private readonly CommentsRepositoryInterface $commentsRepository,
-        private readonly PostsRepositoryInterface $postsRepository,
         private readonly UsersRepositoryInterface $usersRepository
     )
     {
@@ -30,46 +30,41 @@ class CreateComment implements ActionInterface
     public function handle(Request $request): Response
     {
         try {
-            $authorUuid = new UUID($request->jsonBodyField('author_uuid'));
+            $userUuid = new UUID($request->jsonBodyField('user_uuid'));
         } catch (HttpException | InvalidArgumentException $exception) {
             return new ErrorResponse($exception->getMessage());
         }
 
         try {
-            $postUuid = new UUID($request->jsonBodyField('post_uuid'));
+            $commentUuid = new UUID($request->jsonBodyField('comment_uuid'));
         } catch (HttpException | InvalidArgumentException $exception) {
             return new ErrorResponse($exception->getMessage());
         }
 
         try {
-            $user = $this->usersRepository->get($authorUuid);
+            $user = $this->usersRepository->get($userUuid);
         } catch (UserNotFoundException $exception) {
             return new ErrorResponse($exception->getMessage());
         }
 
         try {
-            $post = $this->postsRepository->get($postUuid);
-        } catch (PostNotFoundException $exception) {
+            $comment = $this->commentsRepository->get($commentUuid);
+        } catch (CommentNotFoundException $exception) {
             return new ErrorResponse($exception->getMessage());
         }
 
-        $newCommentUuid = UUID::random();
+        $newCommentLikeUuid = UUID::random();
 
-        try {
-            $comment = new Comment(
-                $newCommentUuid,
-                $post,
-                $user,
-                $request->jsonBodyField('text')
-            );
-        } catch (HttpException $exception) {
-            return new ErrorResponse($exception->getMessage());
-        }
+        $commentLike = new CommentLike(
+            $newCommentLikeUuid,
+            $comment,
+            $user
+        );
 
-        $this->commentsRepository->save($comment);
+        $this->commentLikesRepository->save($commentLike);
 
         return new SuccessfulResponse([
-            'uuid' => (string)$newCommentUuid,
+            'uuid' => (string)$newCommentLikeUuid,
         ]);
     }
 }

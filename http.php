@@ -2,7 +2,9 @@
 
 use Akseonov\Php2\Actions\Comments\CreateComment;
 use Akseonov\Php2\Actions\Comments\FindCommentByUuid;
+use Akseonov\Php2\Actions\Likes\CreateCommentLike;
 use Akseonov\Php2\Actions\Likes\CreatePostLike;
+use Akseonov\Php2\Actions\Likes\FindCommentLikesByCommentUuid;
 use Akseonov\Php2\Actions\Likes\FindPostLikesByPostUuid;
 use Akseonov\Php2\Actions\Posts\CreatePost;
 use Akseonov\Php2\Actions\Posts\DeletePost;
@@ -25,12 +27,14 @@ $routes = [
         '/posts/show' => FindPostByTitle::class,
         '/comments/id' => FindCommentByUuid::class,
         '/posts/likes/show' => FindPostLikesByPostUuid::class,
+        '/comments/likes/show' => FindCommentLikesByCommentUuid::class,
     ],
     'POST' => [
         '/users/create' => CreateUser::class,
         '/posts/create' => CreatePost::class,
         '/comments/create' => CreateComment::class,
         '/posts/likes/create' => CreatePostLike::class,
+        '/comments/likes/create' => CreateCommentLike::class,
     ],
     'DELETE' => [
         '/posts/delete' => DeletePost::class,

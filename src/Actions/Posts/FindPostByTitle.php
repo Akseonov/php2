@@ -14,7 +14,7 @@ use Akseonov\Php2\http\SuccessfulResponse;
 class FindPostByTitle implements ActionInterface
 {
     public function __construct(
-        private PostsRepositoryInterface $postsRepository
+        private readonly PostsRepositoryInterface $postsRepository
     )
     {
     }

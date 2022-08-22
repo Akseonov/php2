@@ -12,6 +12,11 @@ class CommentLike
     {
     }
 
+    public function __toString(): string
+    {
+        return $this->user->getUsername() . ' поставил лайк: ' . $this->comment->getText();
+    }
+
     /**
      * @return UUID
      */

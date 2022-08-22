@@ -8,24 +8,11 @@ GET http://localhost:80/users/id?uuid=6159f29f-9f6d-4b01-a022-cb0519a11ddd
 Accept: application/json
 Cookie: XDEBUG_SESSION=start
 
-<> 2022-08-16T153701.200.json
-<> 2022-08-16T153531.200.json
-<> 2022-08-16T153142.200.json
-<> 2022-08-16T153015.200.json
-<> 2022-08-16T152958.200.json
-<> 2022-08-16T152731.200.json
-<> 2022-08-16T152700.200.json
-<> 2022-08-16T152651.200.json
-<> 2022-08-16T151223.200.json
-<> 2022-08-16T151038.200.json
-
 ###
 
 GET http://localhost:80/users/show?username=admin
 Accept: application/json
 Cookie: XDEBUG_SESSION=start
-
-<> 2022-08-16T153857.200.json
 
 ###
 
@@ -33,23 +20,11 @@ GET http://localhost:80/posts/id?uuid=72ba514a-5205-4876-a1a2-a16a61c0198a
 Accept: application/json
 Cookie: XDEBUG_SESSION=start
 
-<> 2022-08-16T161318.200.json
-<> 2022-08-16T161259.200.html
-<> 2022-08-16T160606.200.html
-<> 2022-08-16T160440.200.json
-<> 2022-08-16T153948.200.json
-<> 2022-08-16T153936.200.json
-
 ###
 
 GET http://localhost:80/posts/show?title=Привет
 Accept: application/json
 Cookie: XDEBUG_SESSION=start
-
-<> 2022-08-16T161605.200.json
-<> 2022-08-16T161446.200.html
-<> 2022-08-16T161339.200.json
-<> 2022-08-16T154619.200.json
 
 ###
 
@@ -57,16 +32,17 @@ GET http://localhost:80/comments/id?uuid=41f40601-5b3f-48ba-9530-efa67389227d
 Accept: application/json
 Cookie: XDEBUG_SESSION=start
 
-<> 2022-08-16T165421.200.json
-<> 2022-08-16T165408.200.json
-
 ###
 
 GET http://localhost:80/posts/likes/show?uuid=76299b9b-e5d3-4915-80d9-8a0e834b4a3c
 Accept: application/json
 Cookie: XDEBUG_SESSION=start
 
+###
 
+GET http://localhost:80/comments/likes/show?uuid=2ef8f342-6a5c-4e7c-b39f-5d688f0fce10
+Accept: application/json
+Cookie: XDEBUG_SESSION=start
 
 ###
 
@@ -80,9 +56,6 @@ Cookie: XDEBUG_SESSION=start
 "text": "Текст для удаления"
 }
 
-<> 2022-08-16T162203.200.json
-<> 2022-08-16T162142.200.json
-
 ###
 
 POST http://localhost:80/comments/create
@@ -95,8 +68,6 @@ Cookie: XDEBUG_SESSION=start
 "text": "Мой новый коммент для эшена"
 }
 
-<> 2022-08-16T170632.200.json
-
 ###
 
 POST http://localhost:80/posts/likes/create
@@ -106,6 +77,17 @@ Cookie: XDEBUG_SESSION=start
 {
 "user_uuid": "10373537-0805-4d7a-830e-22b481b4859c",
 "post_uuid": "ba7ce47b-80e7-4dfc-857c-fb097565a333"
+}
+
+###
+
+POST http://localhost:80/comments/likes/create
+Accept: application/json
+Cookie: XDEBUG_SESSION=start
+
+{
+"user_uuid": "10373537-0805-4d7a-830e-22b481b4859c",
+"comment_uuid": "41f40601-5b3f-48ba-9530-efa67389227d"
 }
 
 ###
