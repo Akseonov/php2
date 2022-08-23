@@ -45,20 +45,17 @@ class SqlitePostLikesRepository implements PostLikesRepositoryInterface
             $this->connection
         );
 
-        $likes = [];
-
-        foreach ($result as $like) {
+        return array_map(function($like) use($userRepository, $postRepository): PostLike
+        {
             $userResult = $userRepository->get(new UUID($like['user_uuid']));
             $postResult = $postRepository->get(new UUID($like['post_uuid']));
 
-            $likes[] = new PostLike(
+            return new PostLike(
                 new UUID($like['uuid']),
                 $postResult,
                 $userResult,
             );
-        }
-
-        return $likes;
+        }, $result);
     }
 
     public function save(PostLike $postLike): void

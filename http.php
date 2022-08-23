@@ -1,21 +1,21 @@
 <?php
 
-use Akseonov\Php2\Actions\Comments\CreateComment;
-use Akseonov\Php2\Actions\Comments\FindCommentByUuid;
-use Akseonov\Php2\Actions\Likes\CreateCommentLike;
-use Akseonov\Php2\Actions\Likes\CreatePostLike;
-use Akseonov\Php2\Actions\Likes\FindCommentLikesByCommentUuid;
-use Akseonov\Php2\Actions\Likes\FindPostLikesByPostUuid;
-use Akseonov\Php2\Actions\Posts\CreatePost;
-use Akseonov\Php2\Actions\Posts\DeletePost;
-use Akseonov\Php2\Actions\Posts\FindPostByTitle;
-use Akseonov\Php2\Actions\Users\CreateUser;
-use Akseonov\Php2\Actions\Users\FindUserByUsername;
-use Akseonov\Php2\Actions\Users\FindUserByUuid;
-use Akseonov\Php2\Actions\Posts\FindPostByUuid;
+use Akseonov\Php2\Exceptions\HttpException;
+use Akseonov\Php2\http\Actions\Comments\CreateComment;
+use Akseonov\Php2\http\Actions\Comments\FindCommentByUuid;
+use Akseonov\Php2\http\Actions\Likes\CreateCommentLike;
+use Akseonov\Php2\http\Actions\Likes\CreatePostLike;
+use Akseonov\Php2\http\Actions\Likes\FindCommentLikesByCommentUuid;
+use Akseonov\Php2\http\Actions\Likes\FindPostLikesByPostUuid;
+use Akseonov\Php2\http\Actions\Posts\CreatePost;
+use Akseonov\Php2\http\Actions\Posts\DeletePost;
+use Akseonov\Php2\http\Actions\Posts\FindPostByTitle;
+use Akseonov\Php2\http\Actions\Posts\FindPostByUuid;
+use Akseonov\Php2\http\Actions\Users\CreateUser;
+use Akseonov\Php2\http\Actions\Users\FindUserByUsername;
+use Akseonov\Php2\http\Actions\Users\FindUserByUuid;
 use Akseonov\Php2\http\ErrorResponse;
 use Akseonov\Php2\http\Request;
-use Akseonov\Php2\Exceptions\HttpException;
 use Psr\Log\LoggerInterface;
 
 $container = require __DIR__ . '/bootstrap.php';

@@ -49,20 +49,17 @@ class SqliteCommentLikesRepository implements CommentLikesRepositoryInterface
             $this->connection
         );
 
-        $likes = [];
-
-        foreach ($result as $like) {
+        return array_map(function($like) use($userRepository, $commentRepository): CommentLike
+        {
             $userResult = $userRepository->get(new UUID($like['user_uuid']));
             $commentResult = $commentRepository->get(new UUID($like['comment_uuid']));
 
-            $likes[] = new CommentLike(
+            return new CommentLike(
                 new UUID($like['uuid']),
                 $commentResult,
                 $userResult,
             );
-        }
-
-        return $likes;
+        }, $result);
     }
 
     public function save(CommentLike $commentLike): void
