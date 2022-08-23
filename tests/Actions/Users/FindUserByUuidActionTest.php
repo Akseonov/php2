@@ -11,6 +11,7 @@ use Akseonov\Php2\http\ErrorResponse;
 use Akseonov\Php2\http\Request;
 use Akseonov\Php2\http\SuccessfulResponse;
 use Akseonov\Php2\Person\Name;
+use Akseonov\Php2\UnitTests\DummyLogger;
 use JsonException;
 use PHPUnit\Framework\TestCase;
 
@@ -58,7 +59,7 @@ class FindUserByUuidActionTest extends TestCase
 
         $usersRepository = $this->usersRepository([]);
 
-        $action = new FindUserByUuid($usersRepository);
+        $action = new FindUserByUuid($usersRepository, new DummyLogger());
 
         $response = $action->handle($request);
 
@@ -81,7 +82,7 @@ class FindUserByUuidActionTest extends TestCase
 
         $usersRepository = $this->usersRepository([]);
 
-        $action = new FindUserByUuid($usersRepository);
+        $action = new FindUserByUuid($usersRepository, new DummyLogger());
 
         $response = $action->handle($request);
 
@@ -104,7 +105,7 @@ class FindUserByUuidActionTest extends TestCase
 
         $usersRepository = $this->usersRepository([]);
 
-        $action = new FindUserByUuid($usersRepository);
+        $action = new FindUserByUuid($usersRepository, new DummyLogger());
 
         $response = $action->handle($request);
 
@@ -133,7 +134,7 @@ class FindUserByUuidActionTest extends TestCase
             ),
         ]);
 
-        $action = new FindUserByUuid($usersRepository);
+        $action = new FindUserByUuid($usersRepository, new DummyLogger());
 
         $response = $action->handle($request);
 

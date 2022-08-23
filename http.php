@@ -16,8 +16,11 @@ use Akseonov\Php2\Actions\Posts\FindPostByUuid;
 use Akseonov\Php2\http\ErrorResponse;
 use Akseonov\Php2\http\Request;
 use Akseonov\Php2\Exceptions\HttpException;
+use Psr\Log\LoggerInterface;
 
 $container = require __DIR__ . '/bootstrap.php';
+
+$logger = $container->get(LoggerInterface::class);
 
 $routes = [
     'GET' => [
@@ -49,25 +52,31 @@ $request = new Request(
 
 try {
     $path = $request->path();
-} catch (HttpException) {
+} catch (HttpException $exception) {
+    $logger->warning($exception->getMessage());
     (new ErrorResponse())->send();
     return;
 }
 
 try {
     $method = $request->method();
-} catch (HttpException) {
+} catch (HttpException $exception) {
+    $logger->warning($exception->getMessage());
     (new ErrorResponse())->send();
     return;
 }
 
 if (!array_key_exists($method, $routes)) {
-    (new ErrorResponse('Route not found'))->send();
+    $message = "Route not found: $method";
+    $logger->notice($message);
+    (new ErrorResponse($message))->send();
     return;
 }
 
 if (!array_key_exists($path, $routes[$method])) {
-    (new ErrorResponse('Route not found'))->send();
+    $message = "Route not found: $path";
+    $logger->notice($message);
+    (new ErrorResponse($message))->send();
     return;
 }
 
@@ -79,5 +88,6 @@ try {
     $response = $action->handle($request);
     $response->send();
 } catch (Exception $exception) {
+    $logger->error($exception->getMessage(), ['exception' => $exception]);
     (new ErrorResponse($exception->getMessage()))->send();
 }

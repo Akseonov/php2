@@ -10,6 +10,7 @@ use Akseonov\Php2\Blog\UUID;
 use Akseonov\Php2\Exceptions\HttpException;
 use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
+use Akseonov\Php2\http\Auth\IdentificationInterface;
 use Akseonov\Php2\http\ErrorResponse;
 use Akseonov\Php2\http\Request;
 use Akseonov\Php2\http\Response;
@@ -20,12 +21,14 @@ class CreatePost implements ActionInterface
     public function __construct(
         private readonly PostsRepositoryInterface $postsRepository,
         private readonly UsersRepositoryInterface $usersRepository,
+//        private IdentificationInterface $identification,
     )
     {
     }
 
     public function handle(Request $request): Response
     {
+//        $user = $this->identification->user($request);
         try {
             $authorUuid = new UUID($request->jsonBodyField('author_uuid'));
         } catch (HttpException | InvalidArgumentException $exception) {

@@ -11,6 +11,7 @@ use Akseonov\Php2\Exceptions\ArgumentsException;
 use Akseonov\Php2\Exceptions\CommandException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
 use Akseonov\Php2\Person\Name;
+use Akseonov\Php2\UnitTests\DummyLogger;
 use PHPUnit\Framework\TestCase;
 
 class CreateUserCommandTest extends TestCase
@@ -62,7 +63,10 @@ class CreateUserCommandTest extends TestCase
      */
     public function testItThrowsAnExceptionWhenUserAlreadyExists(): void
     {
-        $command = new CreateUserCommand($this->makeUserRepositoryWithUserObjectInReturn());
+        $command = new CreateUserCommand(
+            $this->makeUserRepositoryWithUserObjectInReturn(),
+            new DummyLogger()
+        );
 
         $this->expectException(CommandException::class);
         $this->expectExceptionMessage('User already exists: Ivan');
@@ -77,7 +81,10 @@ class CreateUserCommandTest extends TestCase
      */
     public function testItRequiresUsername(): void
     {
-        $command = new CreateUserCommand($this->makeUsersRepositoryWithNotFoundException());
+        $command = new CreateUserCommand(
+            $this->makeUsersRepositoryWithNotFoundException(),
+            new DummyLogger()
+        );
 
         $this->expectException(ArgumentsException::class);
         $this->expectExceptionMessage('No such argument: username');
@@ -90,7 +97,10 @@ class CreateUserCommandTest extends TestCase
      */
     public function testItRequiresLastName(): void
     {
-        $command = new CreateUserCommand($this->makeUsersRepositoryWithNotFoundException());
+        $command = new CreateUserCommand(
+            $this->makeUsersRepositoryWithNotFoundException(),
+            new DummyLogger()
+        );
 
         $this->expectException(ArgumentsException::class);
         $this->expectExceptionMessage('No such argument: last_name');
@@ -106,7 +116,10 @@ class CreateUserCommandTest extends TestCase
      */
     public function testItRequiresFirstName(): void
     {
-        $command = new CreateUserCommand($this->makeUsersRepositoryWithNotFoundException());
+        $command = new CreateUserCommand(
+            $this->makeUsersRepositoryWithNotFoundException(),
+            new DummyLogger()
+        );
 
         $this->expectException(ArgumentsException::class);
         $this->expectExceptionMessage('No such argument: first_name');
@@ -143,7 +156,7 @@ class CreateUserCommandTest extends TestCase
             }
         };
 
-        $command = new CreateUserCommand($usersRepository);
+        $command = new CreateUserCommand($usersRepository, new DummyLogger());
 
         $command->handle(new Arguments([
             'username' => 'Ivan',
