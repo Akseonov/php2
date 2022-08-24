@@ -8,6 +8,7 @@ use Akseonov\Php2\Blog\UUID;
 use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
 use Akseonov\Php2\Person\Name;
+use Akseonov\Php2\UnitTests\DummyLogger;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\TestCase;
@@ -25,7 +26,7 @@ class SqliteUsersRepositoryTest extends TestCase
         $statementStub->method('fetch')->willReturn(false);
         $connectionMock->method('prepare')->willReturn($statementStub);
 
-        $repository = new SqliteUsersRepository($connectionMock);
+        $repository = new SqliteUsersRepository($connectionMock, new DummyLogger());
 
         $this->expectException(UserNotFoundException::class);
         $this->expectExceptionMessage('Cannot get user: Ivan');
@@ -61,7 +62,7 @@ class SqliteUsersRepositoryTest extends TestCase
                 'last_name' => 'Nikitin',
             ]);
 
-        $repository = new SqliteUsersRepository($connectionMock);
+        $repository = new SqliteUsersRepository($connectionMock, new DummyLogger());
 
         $result = $repository->getByUsername('ivan123');
 
@@ -105,7 +106,7 @@ class SqliteUsersRepositoryTest extends TestCase
                 'last_name' => 'Nikitin',
             ]);
 
-        $repository = new SqliteUsersRepository($connectionMock);
+        $repository = new SqliteUsersRepository($connectionMock, new DummyLogger());
 
         $result = $repository->get(new UUID('123e4567-e89b-12d3-a456-426614174000'));
 
@@ -137,7 +138,7 @@ class SqliteUsersRepositoryTest extends TestCase
             ]);
         $connectionStub->method('prepare')->willReturn($statementMock);
 
-        $repository = new SqliteUsersRepository($connectionStub);
+        $repository = new SqliteUsersRepository($connectionStub, new DummyLogger());
 
         $repository->save(
             new User(

@@ -10,6 +10,7 @@ use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
 use Akseonov\Php2\Person\Name;
+use Akseonov\Php2\UnitTests\DummyLogger;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\TestCase;
@@ -29,7 +30,7 @@ class SqlitePostsRepositoryTest extends TestCase
         $statementStub->method('fetch')->willReturn(false);
         $connectionMock->method('prepare')->willReturn($statementStub);
 
-        $repository = new SqlitePostsRepository($connectionMock);
+        $repository = new SqlitePostsRepository($connectionMock, new DummyLogger());
 
         $this->expectException(PostNotFoundException::class);
         $this->expectExceptionMessage('Cannot get post: Мой дом');
@@ -48,42 +49,36 @@ class SqlitePostsRepositoryTest extends TestCase
         $statementMock = $this->createMock(PDOStatement::class);
 
         $statementMock
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('execute')
-            ->with([
-                ':title' => 'Мой дом',
-            ]);
-
-        $statementMock
-            ->expects($this->at(2))
-            ->method('execute')
-            ->with([
-                ':uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
+            ->withConsecutive([
+                [
+                    ':title' => 'Мой дом',
+                ]
+            ], [
+                [
+                    ':uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
+                ]
             ]);
 
         $connectionMock->method('prepare')->willReturn($statementMock);
 
         $statementMock
-            ->expects($this->at(1))
+            ->expects($this->exactly(2))
             ->method('fetch')
-            ->willReturn([
+            ->willReturnOnConsecutiveCalls([
                 'uuid' => '123e4567-e89b-12d3-a456-426614174000',
                 'author_uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
                 'title' => 'Мой дом',
                 'text' => 'Это мой рандомнй текст',
-            ]);
-
-        $statementMock
-            ->expects($this->at(3))
-            ->method('fetch')
-            ->willReturn([
+            ], [
                 'uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
                 'username' => 'username',
                 'first_name' => 'firstname',
                 'last_name' => 'lastname',
             ]);
 
-        $repository = new SqlitePostsRepository($connectionMock);
+        $repository = new SqlitePostsRepository($connectionMock, new DummyLogger());
 
         $result = $repository->getByTitle('Мой дом');
 
@@ -117,42 +112,36 @@ class SqlitePostsRepositoryTest extends TestCase
         $statementMock = $this->createMock(PDOStatement::class);
 
         $statementMock
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('execute')
-            ->with([
-                ':uuid' => '123e4567-e89b-12d3-a456-426614174000',
-            ]);
-
-        $statementMock
-            ->expects($this->at(2))
-            ->method('execute')
-            ->with([
-                ':uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
+            ->withConsecutive([
+                [
+                    ':uuid' => '123e4567-e89b-12d3-a456-426614174000',
+                ]
+            ], [
+                [
+                    ':uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
+                ]
             ]);
 
         $connectionMock->method('prepare')->willReturn($statementMock);
 
         $statementMock
-            ->expects($this->at(1))
+            ->expects($this->exactly(2))
             ->method('fetch')
-            ->willReturn([
+            ->willReturnOnConsecutiveCalls([
                 'uuid' => '123e4567-e89b-12d3-a456-426614174000',
                 'author_uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
                 'title' => 'Мой дом',
                 'text' => 'Это мой рандомнй текст',
-            ]);
-
-        $statementMock
-            ->expects($this->at(3))
-            ->method('fetch')
-            ->willReturn([
+            ], [
                 'uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
                 'username' => 'username',
                 'first_name' => 'firstname',
                 'last_name' => 'lastname',
             ]);
 
-        $repository = new SqlitePostsRepository($connectionMock);
+        $repository = new SqlitePostsRepository($connectionMock, new DummyLogger());
 
         $result = $repository->get(new UUID('123e4567-e89b-12d3-a456-426614174000'));
 
@@ -191,7 +180,7 @@ class SqlitePostsRepositoryTest extends TestCase
             ]);
         $connectionStub->method('prepare')->willReturn($statementMock);
 
-        $repository = new SqlitePostsRepository($connectionStub);
+        $repository = new SqlitePostsRepository($connectionStub, new DummyLogger());
 
         $user = new User(
             new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
@@ -222,7 +211,7 @@ class SqlitePostsRepositoryTest extends TestCase
             ]);
         $connectionStub->method('prepare')->willReturn($statementMock);
 
-        $repository = new SqlitePostsRepository($connectionStub);
+        $repository = new SqlitePostsRepository($connectionStub, new DummyLogger());
 
         $repository->delete(
             new UUID('9de6281b-6fa3-427b-b071-4ca519586e74')

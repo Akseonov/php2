@@ -5,6 +5,7 @@ namespace Akseonov\Php2\Blog\Repositories\UsersRepository;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\UsersRepositoryInterface;
 use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
+use Psr\Log\LoggerInterface;
 use Akseonov\Php2\Exceptions\{UserNotFoundException};
 use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Person\Name;
@@ -13,6 +14,7 @@ class SqliteUsersRepository implements UsersRepositoryInterface
 {
     public function __construct(
         private \PDO $connection,
+        private LoggerInterface $logger,
     )
     {
     }
@@ -26,10 +28,13 @@ class SqliteUsersRepository implements UsersRepositoryInterface
         $result = $statement->fetch(\PDO::FETCH_ASSOC);
 
         if ($result === false) {
+            $this->logger->warning("Cannot get user: $userInfo");
             throw new UserNotFoundException(
                 "Cannot get user: $userInfo"
             );
         }
+
+        $this->logger->info("Finish get user {$result['username']}");
 
         return new User(
             new UUID($result['uuid']),
@@ -40,6 +45,8 @@ class SqliteUsersRepository implements UsersRepositoryInterface
 
     public function save(User $user): void
     {
+        $this->logger->info('Start save user');
+
         $statement = $this->connection->prepare(
             'INSERT INTO users (uuid, username, first_name, last_name)
             VALUES (:uuid, :username, :first_name, :last_name)'
@@ -51,6 +58,8 @@ class SqliteUsersRepository implements UsersRepositoryInterface
             ':uuid' => (string)$user->getUuid(),
             ':username' => $user->getUsername(),
         ]);
+
+        $this->logger->info("Finish save user {$user->getUsername()}");
     }
 
     /**
@@ -59,6 +68,8 @@ class SqliteUsersRepository implements UsersRepositoryInterface
      */
     public function get(UUID $uuid): User
     {
+        $this->logger->info('Start get user by uuid');
+
         $statement = $this->connection->prepare(
             'SELECT * FROM users WHERE uuid = :uuid'
         );
@@ -76,6 +87,8 @@ class SqliteUsersRepository implements UsersRepositoryInterface
      */
     public function getByUsername(string $username): User
     {
+        $this->logger->info('Start get user by username');
+
         $statement = $this->connection->prepare(
             'SELECT * FROM users WHERE username = :username'
         );

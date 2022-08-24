@@ -9,11 +9,13 @@ use Akseonov\Php2\Blog\UUID;
 use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
+use Psr\Log\LoggerInterface;
 
 class SqlitePostsRepository implements PostsRepositoryInterface
 {
     public function __construct(
         private readonly \PDO $connection,
+        private LoggerInterface $logger,
     )
     {
     }
@@ -27,14 +29,17 @@ class SqlitePostsRepository implements PostsRepositoryInterface
         $result = $statement->fetch(\PDO::FETCH_ASSOC);
 
         if ($result === false) {
+            $this->logger->warning("Cannot get post: $postInfo");
             throw new PostNotFoundException(
                 "Cannot get post: $postInfo"
             );
         }
 
-        $userRepository = new SqliteUsersRepository($this->connection);
+        $userRepository = new SqliteUsersRepository($this->connection, $this->logger);
 
         $user = $userRepository->get(new UUID($result['author_uuid']));
+
+        $this->logger->info("Finish get post {$result['uuid']}");
 
         return new Post(
             new UUID($result['uuid']),
@@ -46,6 +51,8 @@ class SqlitePostsRepository implements PostsRepositoryInterface
 
     public function save(Post $post): void
     {
+        $this->logger->info('Start save post');
+
         $statement = $this->connection->prepare(
             'INSERT INTO posts (uuid, author_uuid, title, text)
             VALUES (:uuid, :author_uuid, :title, :text)'
@@ -57,6 +64,8 @@ class SqlitePostsRepository implements PostsRepositoryInterface
             ':title' => $post->getTitle(),
             ':text' => $post->getText(),
         ]);
+
+        $this->logger->info("Finish save post {$post->getUuid()}");
     }
 
     /**
@@ -66,6 +75,8 @@ class SqlitePostsRepository implements PostsRepositoryInterface
      */
     public function get(UUID $uuid): Post
     {
+        $this->logger->info('Start get post by uuid');
+
         $statement = $this->connection->prepare(
             'SELECT * FROM posts WHERE uuid = :uuid'
         );
@@ -84,6 +95,8 @@ class SqlitePostsRepository implements PostsRepositoryInterface
      */
     public function getByTitle(string $title): Post
     {
+        $this->logger->info('Start get post by title');
+
         $statement = $this->connection->prepare(
             'SELECT * FROM posts WHERE title = :title'
         );
@@ -97,6 +110,8 @@ class SqlitePostsRepository implements PostsRepositoryInterface
 
     public function delete(UUID $uuid): void
     {
+        $this->logger->info('Start delete post');
+
         $statement = $this->connection->prepare(
             'DELETE FROM posts WHERE posts.uuid=:uuid;'
         );
@@ -104,5 +119,7 @@ class SqlitePostsRepository implements PostsRepositoryInterface
         $statement->execute([
             ':uuid' => $uuid,
         ]);
+
+        $this->logger->info("Finish delete post: $uuid");
     }
 }

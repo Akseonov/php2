@@ -12,6 +12,7 @@ use Akseonov\Php2\Exceptions\LikesPostNotFoundException;
 use Akseonov\Php2\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
 use Akseonov\Php2\Person\Name;
+use Akseonov\Php2\UnitTests\DummyLogger;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\TestCase;
@@ -31,7 +32,7 @@ class SqlitePostLikesRepositoryTest extends TestCase
         $statementStub->method('fetchAll')->willReturn([]);
         $connectionMock->method('prepare')->willReturn($statementStub);
 
-        $repository = new SqlitePostLikesRepository($connectionMock);
+        $repository = new SqlitePostLikesRepository($connectionMock, new DummyLogger());
 
         $this->expectException(LikesPostNotFoundException::class);
         $this->expectExceptionMessage('Cannot get likes for post: 123e4567-e89b-12d3-a456-426614174000');
@@ -51,39 +52,32 @@ class SqlitePostLikesRepositoryTest extends TestCase
         $statementMock = $this->createMock(PDOStatement::class);
 
         $statementMock
-            ->expects($this->at(0))
+            ->expects($this->exactly(4))
             ->method('execute')
-            ->with([
-                ':uuid' => '123e4567-e89b-12d3-a456-426614174000',
-            ]);
-
-        $statementMock
-            ->expects($this->at(2))
-            ->method('execute')
-            ->with([
-                ':uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
-            ]);
-
-        $statementMock
-            ->expects($this->at(4))
-            ->method('execute')
-            ->with([
-                ':uuid' => 'b6d3c43b-d7ff-4b3c-95d4-f9afccf0c481',
-            ]);
-
-        $statementMock
-            ->expects($this->at(6))
-            ->method('execute')
-            ->with([
-                ':uuid' => '6159f29f-9f6d-4b01-a022-cb0519a11ddd',
+            ->withConsecutive([
+                [
+                    ':uuid' => '123e4567-e89b-12d3-a456-426614174000',
+                ]
+            ], [
+                [
+                    ':uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
+                ]
+            ], [
+                [
+                    ':uuid' => 'b6d3c43b-d7ff-4b3c-95d4-f9afccf0c481',
+                ]
+            ], [
+                [
+                    ':uuid' => '6159f29f-9f6d-4b01-a022-cb0519a11ddd',
+                ]
             ]);
 
         $connectionMock->method('prepare')->willReturn($statementMock);
 
         $statementMock
-            ->expects($this->at(1))
+            ->expects($this->exactly(1))
             ->method('fetchAll')
-            ->willReturn([
+            ->willReturnOnConsecutiveCalls([
                 [
                     'uuid' => '123e4567-e89b-12d3-a456-426614174000',
                     'post_uuid' => 'b6d3c43b-d7ff-4b3c-95d4-f9afccf0c481',
@@ -92,36 +86,26 @@ class SqlitePostLikesRepositoryTest extends TestCase
             ]);
 
         $statementMock
-            ->expects($this->at(3))
+            ->expects($this->exactly(3))
             ->method('fetch')
-            ->willReturn([
+            ->willReturnOnConsecutiveCalls([
                 'uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
                 'username' => 'admin',
                 'first_name' => 'Peter',
                 'last_name' => 'Romanov',
-            ]);
-
-        $statementMock
-            ->expects($this->at(5))
-            ->method('fetch')
-            ->willReturn([
+            ], [
                 'uuid' => 'b6d3c43b-d7ff-4b3c-95d4-f9afccf0c481',
                 'author_uuid' => '6159f29f-9f6d-4b01-a022-cb0519a11ddd',
                 'title' => 'мой рандомный заголовок',
                 'text' => 'мой рандомный текст',
-            ]);
-
-        $statementMock
-            ->expects($this->at(7))
-            ->method('fetch')
-            ->willReturn([
+            ], [
                 'uuid' => '6159f29f-9f6d-4b01-a022-cb0519a11ddd',
                 'username' => 'ivan',
                 'first_name' => 'Ivan',
                 'last_name' => 'Nikitin'
             ]);
 
-        $repository = new SqlitePostLikesRepository($connectionMock);
+        $repository = new SqlitePostLikesRepository($connectionMock, new DummyLogger());
 
         $result = $repository->getByPostUuid(new UUID('123e4567-e89b-12d3-a456-426614174000'));
 
@@ -187,7 +171,7 @@ class SqlitePostLikesRepositoryTest extends TestCase
             ]);
         $connectionStub->method('prepare')->willReturn($statementMock);
 
-        $repository = new SqlitePostLikesRepository($connectionStub);
+        $repository = new SqlitePostLikesRepository($connectionStub, new DummyLogger());
 
         $userLike = new User(
             new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),

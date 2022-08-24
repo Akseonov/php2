@@ -15,11 +15,13 @@ use Akseonov\Php2\Exceptions\LikesPostNotFoundException;
 use Akseonov\Php2\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
 use PDOStatement;
+use Psr\Log\LoggerInterface;
 
 class SqliteCommentLikesRepository implements CommentLikesRepositoryInterface
 {
     public function __construct(
         private readonly \PDO $connection,
+        private readonly LoggerInterface $logger,
     )
     {
     }
@@ -36,18 +38,23 @@ class SqliteCommentLikesRepository implements CommentLikesRepositoryInterface
         $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
         if (empty($result)) {
+            $this->logger->warning("Cannot get likes for post: $likesInfo");
             throw new LikesCommentNotFoundException(
                 "Cannot get likes for comment: $likesInfo"
             );
         }
 
         $userRepository = new SqliteUsersRepository(
-            $this->connection
+            $this->connection,
+            $this->logger,
         );
 
         $commentRepository = new SqliteCommentsRepository(
-            $this->connection
+            $this->connection,
+            $this->logger,
         );
+
+        $this->logger->info("Finish get comment likes");
 
         return array_map(function($like) use($userRepository, $commentRepository): CommentLike
         {
@@ -64,6 +71,8 @@ class SqliteCommentLikesRepository implements CommentLikesRepositoryInterface
 
     public function save(CommentLike $commentLike): void
     {
+        $this->logger->info('Start save comment like');
+
         $statement = $this->connection->prepare(
             'INSERT INTO likes_comment (uuid, comment_uuid, user_uuid)
             VALUES (:uuid, :comment_uuid, :user_uuid)'
@@ -73,6 +82,8 @@ class SqliteCommentLikesRepository implements CommentLikesRepositoryInterface
             ':comment_uuid' => $commentLike->getComment()->getUuid(),
             ':user_uuid' => $commentLike->getUser()->getUuid(),
         ]);
+
+        $this->logger->info("Finish save comment like: {$commentLike->getUuid()}");
     }
 
     /**
@@ -84,6 +95,8 @@ class SqliteCommentLikesRepository implements CommentLikesRepositoryInterface
      */
     public function getByCommentUuid(UUID $uuid): array
     {
+        $this->logger->info('Start get comment likes by comment uuid');
+
         $statementLikes = $this->connection->prepare(
             'SELECT * FROM likes_comment WHERE likes_comment.comment_uuid = :uuid'
         );
