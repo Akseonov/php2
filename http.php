@@ -1,6 +1,8 @@
 <?php
 
 use Akseonov\Php2\Exceptions\HttpException;
+use Akseonov\Php2\http\Actions\Auth\LogIn;
+use Akseonov\Php2\http\Actions\Auth\LogOut;
 use Akseonov\Php2\http\Actions\Comments\CreateComment;
 use Akseonov\Php2\http\Actions\Comments\FindCommentByUuid;
 use Akseonov\Php2\http\Actions\Likes\CreateCommentLike;
@@ -33,6 +35,8 @@ $routes = [
         '/comments/likes/show' => FindCommentLikesByCommentUuid::class,
     ],
     'POST' => [
+        '/login' => LogIn::class,
+        '/logout' => LogOut::class,
         '/users/create' => CreateUser::class,
         '/posts/create' => CreatePost::class,
         '/comments/create' => CreateComment::class,

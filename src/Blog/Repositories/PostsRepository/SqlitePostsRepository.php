@@ -9,13 +9,15 @@ use Akseonov\Php2\Blog\UUID;
 use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
+use PDO;
+use PDOStatement;
 use Psr\Log\LoggerInterface;
 
 class SqlitePostsRepository implements PostsRepositoryInterface
 {
     public function __construct(
-        private readonly \PDO $connection,
-        private LoggerInterface $logger,
+        private readonly PDO            $connection,
+        private readonly LoggerInterface $logger,
     )
     {
     }
@@ -24,9 +26,9 @@ class SqlitePostsRepository implements PostsRepositoryInterface
      * @throws InvalidArgumentException|PostNotFoundException
      * @throws UserNotFoundException
      */
-    private function getPost(\PDOStatement $statement, string $postInfo): Post
+    private function getPost(PDOStatement $statement, string $postInfo): Post
     {
-        $result = $statement->fetch(\PDO::FETCH_ASSOC);
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
 
         if ($result === false) {
             $this->logger->warning("Cannot get post: $postInfo");

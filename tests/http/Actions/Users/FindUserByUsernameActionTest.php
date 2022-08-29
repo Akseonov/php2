@@ -21,7 +21,7 @@ class FindUserByUsernameActionTest extends TestCase
     {
         return new class($users) implements UsersRepositoryInterface {
             public function __construct(
-                private array $users
+                private readonly array $users
             )
             {
             }
@@ -108,6 +108,7 @@ class FindUserByUsernameActionTest extends TestCase
             new User(
                 new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
                 'ivan',
+                '12345',
                 new Name('Ivan', 'Nikitin')
             ),
         ]);
@@ -116,7 +117,7 @@ class FindUserByUsernameActionTest extends TestCase
         $response = $action->handle($request);
 
         $this->assertInstanceOf(SuccessfulResponse::class, $response);
-        $this->expectOutputString('{"success":true,"data":{"uuid":"10373537-0805-4d7a-830e-22b481b4859c","username":"ivan","first_name":"Ivan","last_name":"Nikitin"}}');
+        $this->expectOutputString('{"success":true,"data":{"uuid":"10373537-0805-4d7a-830e-22b481b4859c","username":"ivan","password":"12345","first_name":"Ivan","last_name":"Nikitin"}}');
 
         $response->send();
     }

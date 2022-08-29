@@ -4,12 +4,12 @@ namespace Akseonov\Php2\UnitTests\http\Actions\Posts;
 
 use Akseonov\Php2\Blog\Post;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostsRepositoryInterface;
-use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\UsersRepositoryInterface;
 use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Exceptions\AuthException;
 use Akseonov\Php2\Exceptions\PostNotFoundException;
-use Akseonov\Php2\Exceptions\UserNotFoundException;
 use Akseonov\Php2\http\Actions\Posts\CreatePost;
+use Akseonov\Php2\http\Auth\Interfaces\TokenAuthenticationInterface;
 use Akseonov\Php2\http\ErrorResponse;
 use Akseonov\Php2\http\Request;
 use Akseonov\Php2\http\SuccessfulResponse;
@@ -22,8 +22,7 @@ class CreatePostActionTest extends TestCase
 {
     private function postsRepository(): PostsRepositoryInterface
     {
-        return new class() implements PostsRepositoryInterface
-        {
+        return new class() implements PostsRepositoryInterface {
             private bool $called = false;
 
             public function __construct()
@@ -56,33 +55,33 @@ class CreatePostActionTest extends TestCase
         };
     }
 
-    private function usersRepository(array $users): UsersRepositoryInterface
+    private function tokenAuthenticationEmpty(User $user): TokenAuthenticationInterface
     {
-        return new class($users) implements UsersRepositoryInterface
-        {
+        return new class($user) implements TokenAuthenticationInterface {
             public function __construct(
-                private array $users
             )
             {
             }
 
-            public function save(User $user): void
+            public function user(Request $request): User
+            {
+                throw new AuthException('Not found');
+            }
+        };
+    }
+
+    private function tokenAuthenticationUserReturn(User $user): TokenAuthenticationInterface
+    {
+        return new class($user) implements TokenAuthenticationInterface {
+            public function __construct(
+                private readonly User $user
+            )
             {
             }
 
-            public function get(UUID $uuid): User
+            public function user(Request $request): User
             {
-                foreach ($this->users as $user) {
-                    if ($user instanceof User && (string)$uuid === $user->getUuid()) {
-                        return $user;
-                    }
-                }
-                throw new UserNotFoundException('Not found');
-            }
-
-            public function getByUsername(string $username): User
-            {
-                throw new UserNotFoundException('Not found');
+                return $this->user;
             }
         };
     }
@@ -94,12 +93,21 @@ class CreatePostActionTest extends TestCase
      */
     public function testItReturnsErrorResponseIfCannotDecodeJsonBody(): void
     {
-        $request = new Request([], [], "");
+        $request = new Request([], [
+            'HTTP_AUTHORIZATION' => 'Bearer 02c9747457eec4d4fdf9edecab4df9233d1a4d71db53a9d5c44942b01fd9e46c8d7a1a671194c679'
+        ], "");
 
         $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([]);
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
+            new User(
+                new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
+                'ivan',
+                '12345',
+                new Name('Ivan', 'Nikitin')
+            )
+        );
 
-        $action = new CreatePost($postsRepository, $usersRepository, new DummyLogger());
+        $action = new CreatePost($postsRepository, $tokenAuthentication, new DummyLogger());
 
         $response = $action->handle($request);
 
@@ -116,40 +124,21 @@ class CreatePostActionTest extends TestCase
      */
     public function testItReturnsErrorResponseIfNoAuthorUuidProvided(): void
     {
-        $request = new Request([], [], '{"uuid":"2342342"}');
+        $request = new Request([], [
+            'HTTP_AUTHORIZATION' => 'Bearer 02c9747457eec4d4fdf9edecab4df9233d1a4d71db53a9d5c44942b01fd9e46c8d7a1a671194c679'
+        ], '{"uuid":"2342342"}');
 
         $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([]);
-
-        $action = new CreatePost($postsRepository, $usersRepository, new DummyLogger());
-
-        $response = $action->handle($request);
-
-        $this->assertInstanceOf(ErrorResponse::class, $response);
-        $this->expectOutputString('{"success":false,"reason":"No such Field: author_uuid"}');
-
-        $response->send();
-    }
-
-    /**
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     * @throws JsonException
-     */
-    public function testItReturnsErrorResponseIfNoTitleProvided(): void
-    {
-        $request = new Request([], [], '{"author_uuid":"10373537-0805-4d7a-830e-22b481b4859c"}');
-
-        $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
             new User(
                 new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
                 'ivan',
+                '12345',
                 new Name('Ivan', 'Nikitin')
-            ),
-        ]);
+            )
+        );
 
-        $action = new CreatePost($postsRepository, $usersRepository, new DummyLogger());
+        $action = new CreatePost($postsRepository, $tokenAuthentication, new DummyLogger());
 
         $response = $action->handle($request);
 
@@ -166,18 +155,21 @@ class CreatePostActionTest extends TestCase
      */
     public function testItReturnsErrorResponseIfNoTextProvided(): void
     {
-        $request = new Request([], [], '{"author_uuid":"10373537-0805-4d7a-830e-22b481b4859c","title":"title"}');
+        $request = new Request([], [
+            'HTTP_AUTHORIZATION' => 'Bearer 02c9747457eec4d4fdf9edecab4df9233d1a4d71db53a9d5c44942b01fd9e46c8d7a1a671194c679'
+        ], '{"title":"title"}');
 
         $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
             new User(
                 new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
                 'ivan',
+                '12345',
                 new Name('Ivan', 'Nikitin')
-            ),
-        ]);
+            )
+        );
 
-        $action = new CreatePost($postsRepository, $usersRepository, new DummyLogger());
+        $action = new CreatePost($postsRepository, $tokenAuthentication, new DummyLogger());
 
         $response = $action->handle($request);
 
@@ -192,14 +184,21 @@ class CreatePostActionTest extends TestCase
      * @preserveGlobalState disabled
      * @throws JsonException
      */
-    public function testItReturnsErrorResponseIfNotFoundUser(): void
+    public function testItReturnsErrorResponseIfHeaderNotProvided(): void
     {
-        $request = new Request([], [], '{"author_uuid":"10373537-0805-4d7a-830e-22b481b4859c","title":"title","text":"text"}');
+        $request = new Request([], [], '{"title":"title","text":"text"}');
 
         $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([]);
+        $tokenAuthentication = $this->tokenAuthenticationEmpty(
+            new User(
+                new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
+                'ivan',
+                '12345',
+                new Name('Ivan', 'Nikitin')
+            )
+        );
 
-        $action = new CreatePost($postsRepository, $usersRepository, new DummyLogger());
+        $action = new CreatePost($postsRepository, $tokenAuthentication, new DummyLogger());
 
         $response = $action->handle($request);
 
@@ -216,19 +215,20 @@ class CreatePostActionTest extends TestCase
      */
     public function testItReturnsSuccessfulResponse(): void
     {
-        $request = new Request([], [], '{"author_uuid":"10373537-0805-4d7a-830e-22b481b4859c","title":"title","text":"text"}');
+        $request = new Request([], [], '{"title":"title","text":"text"}');
 
         $postsRepository = $this->postsRepository([]);
 
-        $usersRepository = $this->usersRepository([
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
             new User(
                 new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
                 'username',
+                '12345',
                 new Name('name', 'surname')
             ),
-        ]);
+        );
 
-        $action = new CreatePost($postsRepository, $usersRepository, new DummyLogger());
+        $action = new CreatePost($postsRepository, $tokenAuthentication, new DummyLogger());
 
         $response = $action->handle($request);
 

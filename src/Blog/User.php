@@ -8,15 +8,50 @@ class User
 {
     /**
      * @param UUID $uuid
+     * @param string $username
      * @param Name $name
      */
     public function __construct(
-        private UUID $uuid,
-        private string $username,
-        private Name $name
+        private readonly UUID   $uuid,
+        private readonly string $username,
+        private readonly string $password,
+        private readonly Name   $name
     )
     {
 
+    }
+
+    /**
+     * @return string
+     */
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    private static function hash(string $password, UUID $uuid): string
+    {
+        return hash('sha256', $uuid . $password);
+    }
+
+    public function checkPassword(string $password): bool
+    {
+        return $this->getPassword() === self::hash($password, $this->uuid);
+    }
+
+    public static function createForm(
+        string $username,
+        string $password,
+        Name $name
+    ): self
+    {
+        $uuid = UUID::random();
+        return new self(
+            $uuid,
+            $username,
+            self::hash($password, $uuid),
+            $name,
+        );
     }
 
     public function __toString(): string

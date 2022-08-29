@@ -11,13 +11,14 @@ use Akseonov\Php2\Exceptions\CommentNotFoundException;
 use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
+use PDO;
 use Psr\Log\LoggerInterface;
 
 class SqliteCommentsRepository implements CommentsRepositoryInterface
 {
     public function __construct(
-        private readonly \PDO $connection,
-        private LoggerInterface $logger,
+        private readonly PDO             $connection,
+        private readonly LoggerInterface $logger,
     )
     {
     }
@@ -56,7 +57,7 @@ class SqliteCommentsRepository implements CommentsRepositoryInterface
         $statement->execute([
             ':uuid' => (string)$uuid,
         ]);
-        $result = $statement->fetch(\PDO::FETCH_ASSOC);
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
 
         if ($result === false) {
             $this->logger->warning("Cannot get comment: $uuid");

@@ -74,6 +74,7 @@ class SqlitePostsRepositoryTest extends TestCase
             ], [
                 'uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
                 'username' => 'username',
+                'password' => '12345',
                 'first_name' => 'firstname',
                 'last_name' => 'lastname',
             ]);
@@ -85,6 +86,7 @@ class SqlitePostsRepositoryTest extends TestCase
         $user = new User(
             new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
             'username',
+            '12345',
             new Name('firstname', 'lastname')
         );
 
@@ -137,6 +139,7 @@ class SqlitePostsRepositoryTest extends TestCase
             ], [
                 'uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
                 'username' => 'username',
+                'password' => '12345',
                 'first_name' => 'firstname',
                 'last_name' => 'lastname',
             ]);
@@ -148,6 +151,7 @@ class SqlitePostsRepositoryTest extends TestCase
         $user = new User(
             new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
             'username',
+            '12345',
             new Name('firstname', 'lastname')
         );
 
@@ -185,6 +189,7 @@ class SqlitePostsRepositoryTest extends TestCase
         $user = new User(
             new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
             'username',
+            '12345',
             new Name('firstName', 'lastName')
         );
 

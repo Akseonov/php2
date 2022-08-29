@@ -48,6 +48,7 @@ class CreateCommentCommandTest extends TestCase
                 $user = new User(
                     new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
                     'username',
+                    '12345',
                     new Name('firstname', 'lastname')
                 );
 
@@ -64,6 +65,7 @@ class CreateCommentCommandTest extends TestCase
                 $user = new User(
                     new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
                     'username',
+                    '12345',
                     new Name('firstname', 'lastname')
                 );
 
@@ -95,6 +97,7 @@ class CreateCommentCommandTest extends TestCase
                 return new User(
                     new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
                     'username',
+                    '12345',
                     new Name('firstname', 'lastname')
                 );
             }
@@ -104,6 +107,7 @@ class CreateCommentCommandTest extends TestCase
                 return new User(
                     new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
                     'username',
+                    '12345',
                     new Name('firstname', 'lastname')
                 );
             }
@@ -124,12 +128,14 @@ class CreateCommentCommandTest extends TestCase
                 $userComment = new User(
                     new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
                     'usernameComment',
+                    '12345',
                     new Name('firstNameComment', 'lastNameComment')
                 );
 
                 $userPost = new User(
                     new UUID('6159f29f-9f6d-4b01-a022-cb0519a11ddd'),
                     'usernamePost',
+                    '12345',
                     new Name('firstNamePost', 'lastNamePost')
                 );
 

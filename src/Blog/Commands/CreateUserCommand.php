@@ -14,8 +14,8 @@ use Psr\Log\LoggerInterface;
 class CreateUserCommand
 {
     public function __construct(
-        private UsersRepositoryInterface $usersRepository,
-        private LoggerInterface $logger,
+        private readonly UsersRepositoryInterface $usersRepository,
+        private readonly LoggerInterface          $logger,
     )
     {
 
@@ -36,15 +36,18 @@ class CreateUserCommand
             throw new CommandException("User already exists: $username");
         }
 
-        $uuid = UUID::random();
-
-        $this->usersRepository->save(new User(
-            $uuid,
+        $user = User::createForm(
             $username,
-            new Name($arguments->get('first_name'), $arguments->get('last_name'))
-        ));
+            $arguments->get('password'),
+            new Name(
+                $arguments->get('first_name'),
+                $arguments->get('last_name')
+            )
+        );
 
-        $this->logger->info("User created: $uuid");
+        $this->usersRepository->save($user);
+
+        $this->logger->info("User created: {$user->getUuid()}");
     }
 
     private function userExists(string $username): bool
@@ -56,5 +59,4 @@ class CreateUserCommand
         }
         return true;
     }
-
 }

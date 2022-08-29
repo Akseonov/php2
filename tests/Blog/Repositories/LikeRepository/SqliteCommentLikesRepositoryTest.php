@@ -103,6 +103,7 @@ class SqliteCommentLikesRepositoryTest extends TestCase
             ->willReturnOnConsecutiveCalls([
                 'uuid' => '9de6281b-6fa3-427b-b071-4ca519586e74',
                 'username' => 'admin',
+                'password' => '12345',
                 'first_name' => 'Peter',
                 'last_name' => 'Romanov',
             ], [
@@ -118,11 +119,13 @@ class SqliteCommentLikesRepositoryTest extends TestCase
             ], [
                 'uuid' => '6159f29f-9f6d-4b01-a022-cb0519a11ddd',
                 'username' => 'username',
+                'password' => '12345',
                 'first_name' => 'firstName',
                 'last_name' => 'lastName',
             ], [
                 'uuid' => '6159f29f-9f6d-4b01-a022-cb0519a11ddd',
                 'username' => 'ivan',
+                'password' => '12345',
                 'first_name' => 'Ivan',
                 'last_name' => 'Nikitin'
             ]);
@@ -134,6 +137,7 @@ class SqliteCommentLikesRepositoryTest extends TestCase
         $userLike = new User(
             new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
             'admin',
+            '12345',
             new Name(
                 'Peter',
                 'Romanov'
@@ -143,6 +147,7 @@ class SqliteCommentLikesRepositoryTest extends TestCase
         $userComment = new User(
             new UUID('6159f29f-9f6d-4b01-a022-cb0519a11ddd'),
             'ivan',
+            '12345',
             new Name(
                 'Ivan',
                 'Nikitin'
@@ -152,6 +157,7 @@ class SqliteCommentLikesRepositoryTest extends TestCase
         $userPost = new User(
             new UUID('6159f29f-9f6d-4b01-a022-cb0519a11ddd'),
             'username',
+            '12345',
             new Name('firstName', 'lastName')
         );
 
@@ -211,6 +217,7 @@ class SqliteCommentLikesRepositoryTest extends TestCase
         $userLike = new User(
             new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
             'admin',
+            '12345',
             new Name(
                 'Peter',
                 'Romanov'
@@ -220,6 +227,7 @@ class SqliteCommentLikesRepositoryTest extends TestCase
         $userComment = new User(
             new UUID('6159f29f-9f6d-4b01-a022-cb0519a11ddd'),
             'ivan',
+            '12345',
             new Name(
                 'Ivan',
                 'Nikitin'
@@ -229,6 +237,7 @@ class SqliteCommentLikesRepositoryTest extends TestCase
         $userPost = new User(
             new UUID('6159f29f-9f6d-4b01-a022-cb0519a11ddd'),
             'username',
+            '12345',
             new Name('firstName', 'lastName')
         );
 

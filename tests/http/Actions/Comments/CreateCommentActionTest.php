@@ -6,13 +6,13 @@ use Akseonov\Php2\Blog\Comment;
 use Akseonov\Php2\Blog\Post;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\CommentsRepositoryInterface;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostsRepositoryInterface;
-use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\UsersRepositoryInterface;
 use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Exceptions\AuthException;
 use Akseonov\Php2\Exceptions\CommentNotFoundException;
 use Akseonov\Php2\Exceptions\PostNotFoundException;
-use Akseonov\Php2\Exceptions\UserNotFoundException;
 use Akseonov\Php2\http\Actions\Comments\CreateComment;
+use Akseonov\Php2\http\Auth\Interfaces\TokenAuthenticationInterface;
 use Akseonov\Php2\http\ErrorResponse;
 use Akseonov\Php2\http\Request;
 use Akseonov\Php2\http\SuccessfulResponse;
@@ -81,33 +81,33 @@ class CreateCommentActionTest extends TestCase
         };
     }
 
-    private function usersRepository(array $users): UsersRepositoryInterface
+    private function tokenAuthenticationEmpty(User $user): TokenAuthenticationInterface
     {
-        return new class($users) implements UsersRepositoryInterface
-        {
+        return new class($user) implements TokenAuthenticationInterface {
             public function __construct(
-                private readonly array $users
             )
             {
             }
 
-            public function save(User $user): void
+            public function user(Request $request): User
+            {
+                throw new AuthException('Not found');
+            }
+        };
+    }
+
+    private function tokenAuthenticationUserReturn(User $user): TokenAuthenticationInterface
+    {
+        return new class($user) implements TokenAuthenticationInterface {
+            public function __construct(
+                private readonly User $user
+            )
             {
             }
 
-            public function get(UUID $uuid): User
+            public function user(Request $request): User
             {
-                foreach ($this->users as $user) {
-                    if ($user instanceof User && (string)$uuid === $user->getUuid()) {
-                        return $user;
-                    }
-                }
-                throw new UserNotFoundException('Not found');
-            }
-
-            public function getByUsername(string $username): User
-            {
-                throw new UserNotFoundException('Not found');
+                return $this->user;
             }
         };
     }
@@ -123,12 +123,19 @@ class CreateCommentActionTest extends TestCase
 
         $commentsRepository = $this->commentsRepository([]);
         $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([]);
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
+            new User(
+                new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
+                'ivan',
+                '12345',
+                new Name('Ivan', 'Nikitin')
+            )
+        );
 
-        $action = new \Akseonov\Php2\http\Actions\Comments\CreateComment(
+        $action = new CreateComment(
             $commentsRepository,
             $postsRepository,
-            $usersRepository,
+            $tokenAuthentication,
             new DummyLogger()
         );
 
@@ -145,46 +152,25 @@ class CreateCommentActionTest extends TestCase
      * @preserveGlobalState disabled
      * @throws JsonException
      */
-    public function testItReturnsErrorResponseIfNoAuthorUuidProvided(): void
+    public function testItReturnsErrorResponseIfNoPostUuidProvided(): void
     {
         $request = new Request([], [], '{}');
 
         $commentsRepository = $this->commentsRepository([]);
         $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([]);
-
-        $action = new \Akseonov\Php2\http\Actions\Comments\CreateComment(
-            $commentsRepository,
-            $postsRepository,
-            $usersRepository,
-            new DummyLogger()
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
+            new User(
+                new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
+                'ivan',
+                '12345',
+                new Name('Ivan', 'Nikitin')
+            )
         );
-
-        $response = $action->handle($request);
-
-        $this->assertInstanceOf(ErrorResponse::class, $response);
-        $this->expectOutputString('{"success":false,"reason":"No such Field: author_uuid"}');
-
-        $response->send();
-    }
-
-    /**
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     * @throws JsonException
-     */
-    public function testItReturnsErrorResponseIfNoPostUuidProvided(): void
-    {
-        $request = new Request([], [], '{"author_uuid":"a3e78b09-23ae-44fd-9939-865f688894f5"}');
-
-        $commentsRepository = $this->commentsRepository([]);
-        $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([]);
 
         $action = new CreateComment(
             $commentsRepository,
             $postsRepository,
-            $usersRepository,
+            $tokenAuthentication,
             new DummyLogger()
         );
 
@@ -203,11 +189,12 @@ class CreateCommentActionTest extends TestCase
      */
     public function testItReturnsErrorResponseIfNoTextProvided(): void
     {
-        $request = new Request([], [], '{"author_uuid":"a3e78b09-23ae-44fd-9939-865f688894f5","post_uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10"}');
+        $request = new Request([], [], '{"post_uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10"}');
 
         $user = new User(
             new UUID('a3e78b09-23ae-44fd-9939-865f688894f5'),
             'username',
+            '12345',
             new Name('name', 'surname'),
         );
 
@@ -220,14 +207,14 @@ class CreateCommentActionTest extends TestCase
                 'text'
             )
         ]);
-        $usersRepository = $this->usersRepository([
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
             $user
-        ]);
+        );
 
-        $action = new \Akseonov\Php2\http\Actions\Comments\CreateComment(
+        $action = new CreateComment(
             $commentsRepository,
             $postsRepository,
-            $usersRepository,
+            $tokenAuthentication,
             new DummyLogger()
         );
 
@@ -246,16 +233,23 @@ class CreateCommentActionTest extends TestCase
      */
     public function testItReturnsErrorResponseIfUserNotFound(): void
     {
-        $request = new Request([], [], '{"author_uuid":"a3e78b09-23ae-44fd-9939-865f688894f5","post_uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10"}');
+        $request = new Request([], [], '{"post_uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10"}');
 
         $commentsRepository = $this->commentsRepository([]);
         $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([]);
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
+            new User(
+                new UUID('a3e78b09-23ae-44fd-9939-865f688894f5'),
+                'username',
+                '12345',
+                new Name('name', 'surname'),
+            )
+        );
 
-        $action = new \Akseonov\Php2\http\Actions\Comments\CreateComment(
+        $action = new CreateComment(
             $commentsRepository,
             $postsRepository,
-            $usersRepository,
+            $tokenAuthentication,
             new DummyLogger()
         );
 
@@ -274,22 +268,58 @@ class CreateCommentActionTest extends TestCase
      */
     public function testItReturnsErrorResponseIfPostNotFound(): void
     {
-        $request = new Request([], [], '{"author_uuid":"a3e78b09-23ae-44fd-9939-865f688894f5","post_uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10","text":"text"}');
+        $request = new Request([], [], '{"post_uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10","text":"text"}');
 
         $commentsRepository = $this->commentsRepository([]);
         $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
             new User(
                 new UUID('a3e78b09-23ae-44fd-9939-865f688894f5'),
                 'username',
+                '12345',
                 new Name('name', 'surname'),
             )
-        ]);
+        );
 
-        $action = new \Akseonov\Php2\http\Actions\Comments\CreateComment(
+        $action = new CreateComment(
             $commentsRepository,
             $postsRepository,
-            $usersRepository,
+            $tokenAuthentication,
+            new DummyLogger()
+        );
+
+        $response = $action->handle($request);
+
+        $this->assertInstanceOf(ErrorResponse::class, $response);
+        $this->expectOutputString('{"success":false,"reason":"Not found"}');
+
+        $response->send();
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     * @throws JsonException
+     */
+    public function testItReturnsErrorResponseIfHeaderNotProvided(): void
+    {
+        $request = new Request([], [], '{"title":"title","text":"text"}');
+
+        $commentsRepository = $this->commentsRepository([]);
+        $postsRepository = $this->postsRepository([]);
+        $tokenAuthentication = $this->tokenAuthenticationEmpty(
+            new User(
+                new UUID('a3e78b09-23ae-44fd-9939-865f688894f5'),
+                'username',
+                '12345',
+                new Name('name', 'surname'),
+            )
+        );
+
+        $action = new CreateComment(
+            $commentsRepository,
+            $postsRepository,
+            $tokenAuthentication,
             new DummyLogger()
         );
 
@@ -313,6 +343,7 @@ class CreateCommentActionTest extends TestCase
         $user = new User(
             new UUID('a3e78b09-23ae-44fd-9939-865f688894f5'),
             'username',
+            '12345',
             new Name('name', 'surname'),
         );
 
@@ -325,14 +356,14 @@ class CreateCommentActionTest extends TestCase
                 'text'
             )
         ]);
-        $usersRepository = $this->usersRepository([
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
             $user
-        ]);
+        );
 
-        $action = new \Akseonov\Php2\http\Actions\Comments\CreateComment(
+        $action = new CreateComment(
             $commentsRepository,
             $postsRepository,
-            $usersRepository,
+            $tokenAuthentication,
             new DummyLogger()
         );
 

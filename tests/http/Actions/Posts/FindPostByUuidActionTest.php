@@ -23,7 +23,7 @@ class FindPostByUuidActionTest extends TestCase
         return new class($posts) implements PostsRepositoryInterface
         {
             public function __construct(
-                private array $posts
+                private readonly array $posts
             )
             {
             }
@@ -88,7 +88,7 @@ class FindPostByUuidActionTest extends TestCase
 
         $repository = $this->postsRepository([]);
 
-        $action = new \Akseonov\Php2\http\Actions\Posts\FindPostByUuid($repository, new DummyLogger());
+        $action = new FindPostByUuid($repository, new DummyLogger());
 
         $response = $action->handle($request);
 
@@ -111,7 +111,7 @@ class FindPostByUuidActionTest extends TestCase
 
         $repository = $this->postsRepository([]);
 
-        $action = new \Akseonov\Php2\http\Actions\Posts\FindPostByUuid($repository, new DummyLogger());
+        $action = new FindPostByUuid($repository, new DummyLogger());
 
         $response = $action->handle($request);
 
@@ -135,6 +135,7 @@ class FindPostByUuidActionTest extends TestCase
         $user = new User(
             new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
             'username',
+            '12345',
             new Name('name', 'surname')
         );
 
@@ -147,7 +148,7 @@ class FindPostByUuidActionTest extends TestCase
             )
         ]);
 
-        $action = new \Akseonov\Php2\http\Actions\Posts\FindPostByUuid($repository, new DummyLogger());
+        $action = new FindPostByUuid($repository, new DummyLogger());
 
         $response = $action->handle($request);
 

@@ -22,7 +22,7 @@ class FindUserByUuidActionTest extends TestCase
         return new class($users) implements UsersRepositoryInterface
         {
             public function __construct(
-                private array $users
+                private readonly array $users
             )
             {
             }
@@ -59,7 +59,7 @@ class FindUserByUuidActionTest extends TestCase
 
         $usersRepository = $this->usersRepository([]);
 
-        $action = new \Akseonov\Php2\http\Actions\Users\FindUserByUuid($usersRepository, new DummyLogger());
+        $action = new FindUserByUuid($usersRepository, new DummyLogger());
 
         $response = $action->handle($request);
 
@@ -82,7 +82,7 @@ class FindUserByUuidActionTest extends TestCase
 
         $usersRepository = $this->usersRepository([]);
 
-        $action = new \Akseonov\Php2\http\Actions\Users\FindUserByUuid($usersRepository, new DummyLogger());
+        $action = new FindUserByUuid($usersRepository, new DummyLogger());
 
         $response = $action->handle($request);
 
@@ -130,16 +130,17 @@ class FindUserByUuidActionTest extends TestCase
             new User(
                 new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
                 'ivan',
+                '12345',
                 new Name('Ivan', 'Nikitin')
             ),
         ]);
 
-        $action = new \Akseonov\Php2\http\Actions\Users\FindUserByUuid($usersRepository, new DummyLogger());
+        $action = new FindUserByUuid($usersRepository, new DummyLogger());
 
         $response = $action->handle($request);
 
         $this->assertInstanceOf(SuccessfulResponse::class, $response);
-        $this->expectOutputString('{"success":true,"data":{"uuid":"10373537-0805-4d7a-830e-22b481b4859c","username":"ivan","first_name":"Ivan","last_name":"Nikitin"}}');
+        $this->expectOutputString('{"success":true,"data":{"uuid":"10373537-0805-4d7a-830e-22b481b4859c","username":"ivan","password":"12345","first_name":"Ivan","last_name":"Nikitin"}}');
 
         $response->send();
     }

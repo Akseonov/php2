@@ -11,13 +11,14 @@ use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Exceptions\LikesPostNotFoundException;
 use Akseonov\Php2\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
+use PDO;
 use PDOStatement;
 use Psr\Log\LoggerInterface;
 
 class SqlitePostLikesRepository implements PostLikesRepositoryInterface
 {
     public function __construct(
-        private readonly \PDO            $connection,
+        private readonly PDO            $connection,
         private readonly LoggerInterface $logger,
     )
     {
@@ -31,7 +32,7 @@ class SqlitePostLikesRepository implements PostLikesRepositoryInterface
      */
     private function getLikes(PDOStatement $statement, string $likesInfo): array
     {
-        $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $result = $statement->fetchAll(PDO::FETCH_ASSOC);
 
         if (empty($result)) {
             $this->logger->warning("Cannot get likes for post: $likesInfo");

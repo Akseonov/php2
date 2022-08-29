@@ -57,6 +57,7 @@ class CreatePostCommandTest extends TestCase
                 $user = new User(
                     new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
                     'username',
+                    '12345',
                     new Name('firstname', 'lastname')
                 );
 
@@ -73,6 +74,7 @@ class CreatePostCommandTest extends TestCase
                 $user = new User(
                     new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
                     'username',
+                    '12345',
                     new Name('firstname', 'lastname')
                 );
 
@@ -104,6 +106,7 @@ class CreatePostCommandTest extends TestCase
                 return new User(
                     new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
                     'username',
+                    '12345',
                     new Name('firstname', 'lastname')
                 );
             }
@@ -113,6 +116,7 @@ class CreatePostCommandTest extends TestCase
                 return new User(
                     new UUID('9de6281b-6fa3-427b-b071-4ca519586e74'),
                     'username',
+                    '12345',
                     new Name('firstname', 'lastname')
                 );
             }

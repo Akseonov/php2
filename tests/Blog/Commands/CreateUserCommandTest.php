@@ -48,12 +48,12 @@ class CreateUserCommandTest extends TestCase
 
             public function get(UUID $uuid): User
             {
-                return new User(UUID::random(), "Ivan", new Name("Ivan", "Nikitin"));
+                return new User(UUID::random(), "Ivan", '12345', new Name("Ivan", "Nikitin"));
             }
 
             public function getByUsername(string $username): User
             {
-                return new User(UUID::random(), "Ivan", new Name("Ivan", "Nikitin"));
+                return new User(UUID::random(), "Ivan", '12345', new Name("Ivan", "Nikitin"));
             }
         };
     }
@@ -73,6 +73,7 @@ class CreateUserCommandTest extends TestCase
 
         $command->handle(new Arguments([
             'username' => 'Ivan',
+            'password' => '12345',
         ]));
     }
 
@@ -95,6 +96,24 @@ class CreateUserCommandTest extends TestCase
     /**
      * @throws CommandException
      */
+    public function testItRequiresPassword(): void
+    {
+        $command = new CreateUserCommand(
+            $this->makeUsersRepositoryWithNotFoundException(),
+            new DummyLogger()
+        );
+
+        $this->expectException(ArgumentsException::class);
+        $this->expectExceptionMessage('No such argument: password');
+
+        $command->handle(new Arguments([
+            'username' => 'Ivan',
+        ]));
+    }
+
+    /**
+     * @throws CommandException
+     */
     public function testItRequiresLastName(): void
     {
         $command = new CreateUserCommand(
@@ -107,6 +126,7 @@ class CreateUserCommandTest extends TestCase
 
         $command->handle(new Arguments([
             'username' => 'Ivan',
+            'password' => '12345',
             'first_name' => 'Ivan',
         ]));
     }
@@ -124,7 +144,10 @@ class CreateUserCommandTest extends TestCase
         $this->expectException(ArgumentsException::class);
         $this->expectExceptionMessage('No such argument: first_name');
 
-        $command->handle(new Arguments(['username' => 'Ivan']));
+        $command->handle(new Arguments([
+            'username' => 'Ivan',
+            'password' => '12345',
+        ]));
     }
 
     /**
@@ -160,6 +183,7 @@ class CreateUserCommandTest extends TestCase
 
         $command->handle(new Arguments([
             'username' => 'Ivan',
+            'password' => '12345',
             'first_name' => 'Ivan',
             'last_name' => 'Nikitin',
         ]));

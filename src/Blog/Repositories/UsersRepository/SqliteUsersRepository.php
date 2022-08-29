@@ -13,8 +13,8 @@ use Akseonov\Php2\Person\Name;
 class SqliteUsersRepository implements UsersRepositoryInterface
 {
     public function __construct(
-        private \PDO $connection,
-        private LoggerInterface $logger,
+        private readonly \PDO            $connection,
+        private readonly LoggerInterface $logger,
     )
     {
     }
@@ -39,6 +39,7 @@ class SqliteUsersRepository implements UsersRepositoryInterface
         return new User(
             new UUID($result['uuid']),
             $result['username'],
+            $result['password'],
             new Name($result['first_name'], $result['last_name'])
         );
     }
@@ -48,8 +49,8 @@ class SqliteUsersRepository implements UsersRepositoryInterface
         $this->logger->info('Start save user');
 
         $statement = $this->connection->prepare(
-            'INSERT INTO users (uuid, username, first_name, last_name)
-            VALUES (:uuid, :username, :first_name, :last_name)'
+            'INSERT INTO users (uuid, username, password, first_name, last_name)
+            VALUES (:uuid, :username, :password, :first_name, :last_name)'
         );
 
         $statement->execute([
@@ -57,6 +58,7 @@ class SqliteUsersRepository implements UsersRepositoryInterface
             ':last_name' => $user->getName()->getLastName(),
             ':uuid' => (string)$user->getUuid(),
             ':username' => $user->getUsername(),
+            ':password' => $user->getPassword(),
         ]);
 
         $this->logger->info("Finish save user {$user->getUsername()}");

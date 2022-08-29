@@ -25,7 +25,7 @@ class DeletePostActionTest extends TestCase
             private bool $called = false;
 
             public function __construct(
-                private array $posts
+                private readonly array $posts
             )
             {
             }
@@ -136,6 +136,7 @@ class DeletePostActionTest extends TestCase
         $user = new User(
             new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
             'username',
+            '12345',
             new Name('name', 'surname')
         );
 

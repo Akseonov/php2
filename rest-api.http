@@ -51,9 +51,10 @@ Accept: application/json
 Cookie: XDEBUG_SESSION=start
 
 {
-"username": "admin",
-"first_name": "Админ",
-"last_name": "Рут"
+"username": "root1",
+"password": "12345",
+"first_name": "Рутовый",
+"last_name": "Пользователь"
 }
 
 ###
@@ -63,7 +64,8 @@ Accept: application/json
 Cookie: XDEBUG_SESSION=start
 
 {
-"author_uuid": "10373537-0805-4d7a-830e-22b481b4859c",
+"username": "root1",
+"password": "12345",
 "title": "Заголовок для удаления",
 "text": "Текст для удаления"
 }
@@ -71,11 +73,11 @@ Cookie: XDEBUG_SESSION=start
 ###
 
 POST http://localhost:80/comments/create
+Authorization: Bearer 02c9747457eec4d4fdf9edecab4df9233d1a4d71db53a9d5c44942b01fd9e46c8d7a1a671194c679
 Accept: application/json
 Cookie: XDEBUG_SESSION=start
 
 {
-"author_uuid": "a3e78b09-23ae-44fd-9939-865f688894f5",
 "post_uuid": "56c541f7-6665-4e67-8e0d-41e544855b6d",
 "text": "Мой новый коммент для эшена"
 }
@@ -83,11 +85,11 @@ Cookie: XDEBUG_SESSION=start
 ###
 
 POST http://localhost:80/posts/likes/create
+Authorization: Bearer 02c9747457eec4d4fdf9edecab4df9233d1a4d71db53a9d5c44942b01fd9e46c8d7a1a671194c679
 Accept: application/json
 Cookie: XDEBUG_SESSION=start
 
 {
-"user_uuid": "6159f29f-9f6d-4b01-a022-cb0519a11ddd",
 "post_uuid": "76299b9b-e5d3-4915-80d9-8a0e834b4a3c"
 }
 
@@ -100,6 +102,36 @@ Cookie: XDEBUG_SESSION=start
 {
 "user_uuid": "10373537-0805-4d7a-830e-22b481b4859c",
 "comment_uuid": "41f40601-5b3f-48ba-9530-efa67389227d"
+}
+
+###
+
+POST http://localhost:80/login
+Accept: application/json
+Cookie: XDEBUG_SESSION=start
+
+{
+"username": "root1",
+"password": "12345"
+}
+
+###
+
+POST http://localhost:80/logout
+Authorization: Bearer 02c9747457eec4d4fdf9edecab4df9233d1a4d71db53a9d5c44942b01fd9e46c8d7a1a671194c679
+Accept: application/json
+Cookie: XDEBUG_SESSION=start
+
+###
+
+POST http://localhost:80/posts/create
+Authorization: Bearer 02c9747457eec4d4fdf9edecab4df9233d1a4d71db53a9d5c44942b01fd9e46c8d7a1a671194c679
+Accept: application/json
+Cookie: XDEBUG_SESSION=start
+
+{
+"text": "some text",
+"title": "some title"
 }
 
 ###

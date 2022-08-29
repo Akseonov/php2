@@ -9,10 +9,12 @@ use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostsRepositoryInterfac
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\UsersRepositoryInterface;
 use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Exceptions\AuthException;
 use Akseonov\Php2\Exceptions\LikesPostNotFoundException;
 use Akseonov\Php2\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
 use Akseonov\Php2\http\Actions\Likes\CreatePostLike;
+use Akseonov\Php2\http\Auth\Interfaces\TokenAuthenticationInterface;
 use Akseonov\Php2\http\ErrorResponse;
 use Akseonov\Php2\http\Request;
 use Akseonov\Php2\http\SuccessfulResponse;
@@ -100,33 +102,33 @@ class CreatePostLikeActionTest extends TestCase
         };
     }
 
-    private function usersRepository(array $users): UsersRepositoryInterface
+    private function tokenAuthenticationEmpty(User $user): TokenAuthenticationInterface
     {
-        return new class($users) implements UsersRepositoryInterface
-        {
+        return new class($user) implements TokenAuthenticationInterface {
             public function __construct(
-                private readonly array $users
             )
             {
             }
 
-            public function save(User $user): void
+            public function user(Request $request): User
+            {
+                throw new AuthException('Not found');
+            }
+        };
+    }
+
+    private function tokenAuthenticationUserReturn(User $user): TokenAuthenticationInterface
+    {
+        return new class($user) implements TokenAuthenticationInterface {
+            public function __construct(
+                private readonly User $user
+            )
             {
             }
 
-            public function get(UUID $uuid): User
+            public function user(Request $request): User
             {
-                foreach ($this->users as $user) {
-                    if ($user instanceof User && (string)$uuid === $user->getUuid()) {
-                        return $user;
-                    }
-                }
-                throw new UserNotFoundException('Not found');
-            }
-
-            public function getByUsername(string $username): User
-            {
-                throw new UserNotFoundException('Not found');
+                return $this->user;
             }
         };
     }
@@ -142,12 +144,19 @@ class CreatePostLikeActionTest extends TestCase
 
         $postLikesRepository = $this->postLikesRepository([]);
         $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([]);
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
+            new User(
+                new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
+                'ivan',
+                '12345',
+                new Name('Ivan', 'Nikitin')
+            )
+        );
 
         $action = new CreatePostLike(
             $postLikesRepository,
             $postsRepository,
-            $usersRepository,
+            $tokenAuthentication,
             new DummyLogger()
         );
 
@@ -164,46 +173,25 @@ class CreatePostLikeActionTest extends TestCase
      * @preserveGlobalState disabled
      * @throws JsonException
      */
-    public function testItReturnsErrorResponseIfNoAuthorUuidProvided(): void
+    public function testItReturnsErrorResponseIfNoPostUuidProvided(): void
     {
         $request = new Request([], [], '{}');
 
         $postLikesRepository = $this->postLikesRepository([]);
         $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([]);
-
-        $action = new CreatePostLike(
-            $postLikesRepository,
-            $postsRepository,
-            $usersRepository,
-            new DummyLogger()
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
+            new User(
+                new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
+                'ivan',
+                '12345',
+                new Name('Ivan', 'Nikitin')
+            )
         );
 
-        $response = $action->handle($request);
-
-        $this->assertInstanceOf(ErrorResponse::class, $response);
-        $this->expectOutputString('{"success":false,"reason":"No such Field: user_uuid"}');
-
-        $response->send();
-    }
-
-    /**
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     * @throws JsonException
-     */
-    public function testItReturnsErrorResponseIfNoPostUuidProvided(): void
-    {
-        $request = new Request([], [], '{"user_uuid":"a3e78b09-23ae-44fd-9939-865f688894f5"}');
-
-        $postLikesRepository = $this->postLikesRepository([]);
-        $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([]);
-
         $action = new CreatePostLike(
             $postLikesRepository,
             $postsRepository,
-            $usersRepository,
+            $tokenAuthentication,
             new DummyLogger()
         );
 
@@ -222,16 +210,23 @@ class CreatePostLikeActionTest extends TestCase
      */
     public function testItReturnsErrorResponseIfUserNotFound(): void
     {
-        $request = new Request([], [], '{"user_uuid":"a3e78b09-23ae-44fd-9939-865f688894f5","post_uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10"}');
+        $request = new Request([], [], '{"post_uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10"}');
 
         $postLikesRepository = $this->postLikesRepository([]);
         $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([]);
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
+            new User(
+                new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
+                'ivan',
+                '12345',
+                new Name('Ivan', 'Nikitin')
+            )
+        );
 
         $action = new CreatePostLike(
             $postLikesRepository,
             $postsRepository,
-            $usersRepository,
+            $tokenAuthentication,
             new DummyLogger()
         );
 
@@ -250,22 +245,23 @@ class CreatePostLikeActionTest extends TestCase
      */
     public function testItReturnsErrorResponseIfPostNotFound(): void
     {
-        $request = new Request([], [], '{"user_uuid":"a3e78b09-23ae-44fd-9939-865f688894f5","post_uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10","text":"text"}');
+        $request = new Request([], [], '{"post_uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10","text":"text"}');
 
         $postLikesRepository = $this->postLikesRepository([]);
         $postsRepository = $this->postsRepository([]);
-        $usersRepository = $this->usersRepository([
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
             new User(
-                new UUID('a3e78b09-23ae-44fd-9939-865f688894f5'),
-                'username',
-                new Name('name', 'surname'),
+                new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
+                'ivan',
+                '12345',
+                new Name('Ivan', 'Nikitin')
             )
-        ]);
+        );
 
         $action = new CreatePostLike(
             $postLikesRepository,
             $postsRepository,
-            $usersRepository,
+            $tokenAuthentication,
             new DummyLogger()
         );
 
@@ -284,11 +280,12 @@ class CreatePostLikeActionTest extends TestCase
      */
     public function testItReturnsErrorResponseIfPostLikeAlreadyExist(): void
     {
-        $request = new Request([], [], '{"user_uuid":"a3e78b09-23ae-44fd-9939-865f688894f5","post_uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10"}');
+        $request = new Request([], [], '{"post_uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10"}');
 
         $user = new User(
             new UUID('a3e78b09-23ae-44fd-9939-865f688894f5'),
             'username',
+            '12345',
             new Name('name', 'surname'),
         );
 
@@ -310,14 +307,14 @@ class CreatePostLikeActionTest extends TestCase
         $postsRepository = $this->postsRepository([
             $post
         ]);
-        $usersRepository = $this->usersRepository([
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
             $user
-        ]);
+        );
 
         $action = new CreatePostLike(
             $postLikesRepository,
             $postsRepository,
-            $usersRepository,
+            $tokenAuthentication,
             new DummyLogger()
         );
 
@@ -334,13 +331,67 @@ class CreatePostLikeActionTest extends TestCase
      * @preserveGlobalState disabled
      * @throws JsonException
      */
-    public function testItReturnsSuccessfulResponse(): void
+    public function testItReturnsErrorResponseIfAuthTokenNotProvided(): void
     {
-        $request = new Request([], [], '{"user_uuid":"cc95e109-3a63-4f39-8183-c3d3fc861f16","post_uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10"}');
+        $request = new Request([], [], '{"comment_uuid":"10373537-0805-4d7a-830e-22b481b4859c"}');
 
         $user = new User(
             new UUID('a3e78b09-23ae-44fd-9939-865f688894f5'),
             'username',
+            '12345',
+            new Name('name', 'surname'),
+        );
+
+        $post = new Post(
+            new UUID('2ef8f342-6a5c-4e7c-b39f-5d688f0fce10'),
+            $user,
+            'title',
+            'text'
+        );
+
+        $postLikesRepository = $this->postLikesRepository([
+            new PostLike(
+                new UUID('aa081104-db69-44db-af66-b7e43090596f'),
+                $post,
+                $user
+            )
+        ]);
+
+        $postsRepository = $this->postsRepository([
+            $post
+        ]);
+        $tokenAuthentication = $this->tokenAuthenticationEmpty(
+            $user
+        );
+
+        $action = new CreatePostLike(
+            $postLikesRepository,
+            $postsRepository,
+            $tokenAuthentication,
+            new DummyLogger()
+        );
+
+        $response = $action->handle($request);
+
+        $this->assertInstanceOf(ErrorResponse::class, $response);
+        $this->expectOutputString('{"success":false,"reason":"Not found"}');
+
+        $response->send();
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     * @throws JsonException
+     */
+    public function testItReturnsSuccessfulResponse(): void
+    {
+        $request = new Request([], [], '{"post_uuid":"2ef8f342-6a5c-4e7c-b39f-5d688f0fce10"}');
+
+        $user = new User(
+            new UUID('a3e78b09-23ae-44fd-9939-865f688894f5'),
+            'username',
+            '12345',
             new Name('name', 'surname'),
         );
 
@@ -361,19 +412,19 @@ class CreatePostLikeActionTest extends TestCase
         $postsRepository = $this->postsRepository([
             $post
         ]);
-        $usersRepository = $this->usersRepository([
-            $user,
+        $tokenAuthentication = $this->tokenAuthenticationUserReturn(
             new User(
-                new UUID('cc95e109-3a63-4f39-8183-c3d3fc861f16'),
-                'admin',
-                new Name('pat', 'mat')
+                new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
+                'ivan',
+                '12345',
+                new Name('Ivan', 'Nikitin')
             )
-        ]);
+        );
 
         $action = new CreatePostLike(
             $postLikesRepository,
             $postsRepository,
-            $usersRepository,
+            $tokenAuthentication,
             new DummyLogger()
         );
 

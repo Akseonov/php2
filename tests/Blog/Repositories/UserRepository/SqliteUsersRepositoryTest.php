@@ -58,6 +58,7 @@ class SqliteUsersRepositoryTest extends TestCase
             ->willReturn([
                 'uuid' => '123e4567-e89b-12d3-a456-426614174000',
                 'username' => 'ivan123',
+                'password' => '12345',
                 'first_name' => 'Ivan',
                 'last_name' => 'Nikitin',
             ]);
@@ -69,6 +70,7 @@ class SqliteUsersRepositoryTest extends TestCase
         $this->assertEquals(new User(
             new UUID('123e4567-e89b-12d3-a456-426614174000'),
             'ivan123',
+            '12345',
             new Name('Ivan', 'Nikitin')
         ), $result);
 
@@ -102,6 +104,7 @@ class SqliteUsersRepositoryTest extends TestCase
             ->willReturn([
                 'uuid' => '123e4567-e89b-12d3-a456-426614174000',
                 'username' => 'ivan123',
+                'password' => '12345',
                 'first_name' => 'Ivan',
                 'last_name' => 'Nikitin',
             ]);
@@ -113,6 +116,7 @@ class SqliteUsersRepositoryTest extends TestCase
         $this->assertEquals(new User(
             new UUID('123e4567-e89b-12d3-a456-426614174000'),
             'ivan123',
+            '12345',
             new Name('Ivan', 'Nikitin')
         ), $result);
 
@@ -133,6 +137,7 @@ class SqliteUsersRepositoryTest extends TestCase
             ->with([
                 ':uuid' => '123e4567-e89b-12d3-a456-426614174000',
                 ':username' => 'ivan123',
+                ':password' => '12345',
                 ':first_name' => 'Ivan',
                 ':last_name' => 'Nikitin',
             ]);
@@ -144,6 +149,7 @@ class SqliteUsersRepositoryTest extends TestCase
             new User(
                 new UUID('123e4567-e89b-12d3-a456-426614174000'),
                 'ivan123',
+                '12345',
                 new Name('Ivan', 'Nikitin')
             )
         );

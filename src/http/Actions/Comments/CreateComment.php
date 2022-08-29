@@ -7,11 +7,13 @@ use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\CommentsRepositoryInter
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostsRepositoryInterface;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\UsersRepositoryInterface;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Exceptions\AuthException;
 use Akseonov\Php2\Exceptions\HttpException;
 use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
 use Akseonov\Php2\http\Actions\ActionInterface;
+use Akseonov\Php2\http\Auth\Interfaces\TokenAuthenticationInterface;
 use Akseonov\Php2\http\ErrorResponse;
 use Akseonov\Php2\http\Request;
 use Akseonov\Php2\http\Response;
@@ -23,7 +25,7 @@ class CreateComment implements ActionInterface
     public function __construct(
         private readonly CommentsRepositoryInterface $commentsRepository,
         private readonly PostsRepositoryInterface $postsRepository,
-        private readonly UsersRepositoryInterface $usersRepository,
+        private readonly TokenAuthenticationInterface $authentication,
         private readonly LoggerInterface $logger,
     )
     {
@@ -34,22 +36,14 @@ class CreateComment implements ActionInterface
         $this->logger->info('CreateComment action start');
 
         try {
-            $authorUuid = new UUID($request->jsonBodyField('author_uuid'));
-        } catch (HttpException | InvalidArgumentException $exception) {
-            $this->logger->warning($exception->getMessage());
+            $user = $this->authentication->user($request);
+        } catch (AuthException $exception) {
             return new ErrorResponse($exception->getMessage());
         }
 
         try {
             $postUuid = new UUID($request->jsonBodyField('post_uuid'));
         } catch (HttpException | InvalidArgumentException $exception) {
-            $this->logger->warning($exception->getMessage());
-            return new ErrorResponse($exception->getMessage());
-        }
-
-        try {
-            $user = $this->usersRepository->get($authorUuid);
-        } catch (UserNotFoundException $exception) {
             $this->logger->warning($exception->getMessage());
             return new ErrorResponse($exception->getMessage());
         }

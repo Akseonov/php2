@@ -7,12 +7,14 @@ use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostLikesRepositoryInte
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostsRepositoryInterface;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\UsersRepositoryInterface;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Exceptions\AuthException;
 use Akseonov\Php2\Exceptions\HttpException;
 use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Exceptions\LikesPostNotFoundException;
 use Akseonov\Php2\Exceptions\PostNotFoundException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
 use Akseonov\Php2\http\Actions\ActionInterface;
+use Akseonov\Php2\http\Auth\Interfaces\TokenAuthenticationInterface;
 use Akseonov\Php2\http\ErrorResponse;
 use Akseonov\Php2\http\Request;
 use Akseonov\Php2\http\Response;
@@ -24,7 +26,8 @@ class CreatePostLike implements ActionInterface
     public function __construct(
         private readonly PostLikesRepositoryInterface $postLikesRepository,
         private readonly PostsRepositoryInterface $postsRepository,
-        private readonly UsersRepositoryInterface $usersRepository,
+//        private readonly UsersRepositoryInterface $usersRepository,
+        private readonly TokenAuthenticationInterface $authentication,
         private readonly LoggerInterface $logger,
     )
     {
@@ -35,12 +38,17 @@ class CreatePostLike implements ActionInterface
         $this->logger->info('CreatePostLike action start');
 
         try {
-            $userUuid = new UUID($request->jsonBodyField('user_uuid'));
+            $user = $this->authentication->user($request);
+        } catch (AuthException $exception) {
+            return new ErrorResponse($exception->getMessage());
+        }
+
+        try {
             $postUuid = new UUID($request->jsonBodyField('post_uuid'));
 
-            if ($this->postLikeExist($userUuid, $postUuid)) {
-                $this->logger->warning("Post like already exists: $userUuid, $postUuid");
-                throw new HttpException("Post like already exists: $userUuid, $postUuid");
+            if ($this->postLikeExist(new UUID($user->getUuid()), $postUuid)) {
+                $this->logger->warning("Post like already exists: {$user->getUuid()}, $postUuid");
+                throw new HttpException("Post like already exists: {$user->getUuid()}, $postUuid");
             }
 
         } catch (HttpException | InvalidArgumentException $exception) {
@@ -49,9 +57,8 @@ class CreatePostLike implements ActionInterface
         }
 
         try {
-            $user = $this->usersRepository->get($userUuid);
             $post = $this->postsRepository->get($postUuid);
-        } catch (UserNotFoundException | PostNotFoundException $exception) {
+        } catch (PostNotFoundException $exception) {
             $this->logger->warning($exception->getMessage());
             return new ErrorResponse($exception->getMessage());
         }

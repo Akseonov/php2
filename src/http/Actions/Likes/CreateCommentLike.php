@@ -7,12 +7,14 @@ use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\CommentLikesRepositoryI
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\CommentsRepositoryInterface;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\UsersRepositoryInterface;
 use Akseonov\Php2\Blog\UUID;
+use Akseonov\Php2\Exceptions\AuthException;
 use Akseonov\Php2\Exceptions\CommentNotFoundException;
 use Akseonov\Php2\Exceptions\HttpException;
 use Akseonov\Php2\Exceptions\InvalidArgumentException;
 use Akseonov\Php2\Exceptions\LikesCommentNotFoundException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
 use Akseonov\Php2\http\Actions\ActionInterface;
+use Akseonov\Php2\http\Auth\Interfaces\TokenAuthenticationInterface;
 use Akseonov\Php2\http\ErrorResponse;
 use Akseonov\Php2\http\Request;
 use Akseonov\Php2\http\Response;
@@ -24,7 +26,8 @@ class CreateCommentLike implements ActionInterface
     public function __construct(
         private readonly CommentLikesRepositoryInterface $commentLikesRepository,
         private readonly CommentsRepositoryInterface $commentsRepository,
-        private readonly UsersRepositoryInterface $usersRepository,
+//        private readonly UsersRepositoryInterface $usersRepository,
+        private readonly TokenAuthenticationInterface $authentication,
         private readonly LoggerInterface $logger,
     )
     {
@@ -35,12 +38,17 @@ class CreateCommentLike implements ActionInterface
         $this->logger->info('CreateCommentLike action start');
 
         try {
-            $userUuid = new UUID($request->jsonBodyField('user_uuid'));
+            $user = $this->authentication->user($request);
+        } catch (AuthException $exception) {
+            return new ErrorResponse($exception->getMessage());
+        }
+
+        try {
             $commentUuid = new UUID($request->jsonBodyField('comment_uuid'));
 
-            if ($this->commentLikeExist($userUuid, $commentUuid)) {
-                $this->logger->warning("Post like already exists: $userUuid, $commentUuid");
-                throw new HttpException("Post like already exists: $userUuid, $commentUuid");
+            if ($this->commentLikeExist(new UUID($user->getUuid()), $commentUuid)) {
+                $this->logger->warning("Post like already exists: {$user->getUuid()}, $commentUuid");
+                throw new HttpException("Post like already exists: {$user->getUuid()}, $commentUuid");
             }
         } catch (HttpException | InvalidArgumentException $exception) {
             $this->logger->warning($exception->getMessage());
@@ -48,9 +56,8 @@ class CreateCommentLike implements ActionInterface
         }
 
         try {
-            $user = $this->usersRepository->get($userUuid);
             $comment = $this->commentsRepository->get($commentUuid);
-        } catch (UserNotFoundException | CommentNotFoundException $exception) {
+        } catch (CommentNotFoundException $exception) {
             $this->logger->warning($exception->getMessage());
             return new ErrorResponse($exception->getMessage());
         }

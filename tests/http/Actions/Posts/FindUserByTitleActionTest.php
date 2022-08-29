@@ -23,7 +23,7 @@ class FindUserByTitleActionTest extends TestCase
         return new class($posts) implements PostsRepositoryInterface
         {
             public function __construct(
-                private array $posts
+                private readonly array $posts
             )
             {
             }
@@ -65,7 +65,7 @@ class FindUserByTitleActionTest extends TestCase
 
         $repository = $this->postsRepository([]);
 
-        $action = new \Akseonov\Php2\http\Actions\Posts\FindPostByTitle($repository, new DummyLogger());
+        $action = new FindPostByTitle($repository, new DummyLogger());
 
         $response = $action->handle($request);
 
@@ -112,6 +112,7 @@ class FindUserByTitleActionTest extends TestCase
         $user = new User(
             new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
             'username',
+            '12345',
             new Name('name', 'surname')
         );
 

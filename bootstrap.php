@@ -1,18 +1,25 @@
 <?php
 
 use Akseonov\Php2\Blog\Container\DIContainer;
+use Akseonov\Php2\Blog\Repositories\AuthTokensRepository\SqliteAuthTokensRepository;
 use Akseonov\Php2\Blog\Repositories\CommentsRepository\SqliteCommentsRepository;
 use Akseonov\Php2\Blog\Repositories\LikesRepository\SqliteCommentLikesRepository;
 use Akseonov\Php2\Blog\Repositories\LikesRepository\SqlitePostLikesRepository;
 use Akseonov\Php2\Blog\Repositories\PostsRepository\SqlitePostsRepository;
+use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\AuthTokensRepositoryInterface;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\CommentLikesRepositoryInterface;
-use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostLikesRepositoryInterface;
-use Akseonov\Php2\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\CommentsRepositoryInterface;
+use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostLikesRepositoryInterface;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\PostsRepositoryInterface;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\UsersRepositoryInterface;
-use Akseonov\Php2\http\Auth\IdentificationInterface;
+use Akseonov\Php2\Blog\Repositories\UsersRepository\SqliteUsersRepository;
+use Akseonov\Php2\http\Auth\BearerTokenAuthentication;
+use Akseonov\Php2\http\Auth\Interfaces\AuthenticationInterface;
+use Akseonov\Php2\http\Auth\Interfaces\IdentificationInterface;
+use Akseonov\Php2\http\Auth\Interfaces\PasswordAuthenticationInterface;
+use Akseonov\Php2\http\Auth\Interfaces\TokenAuthenticationInterface;
 use Akseonov\Php2\http\Auth\JsonBodyUuidIdentification;
+use Akseonov\Php2\http\Auth\PasswordAuthentication;
 use Dotenv\Dotenv;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -56,6 +63,21 @@ $container->bind(
 $container->bind(
     IdentificationInterface::class,
     JsonBodyUuidIdentification::class
+);
+
+$container->bind(
+    PasswordAuthenticationInterface::class,
+    PasswordAuthentication::class
+);
+
+$container->bind(
+    AuthTokensRepositoryInterface::class,
+    SqliteAuthTokensRepository::class
+);
+
+$container->bind(
+    TokenAuthenticationInterface::class,
+    BearerTokenAuthentication::class
 );
 
 $logger = (new Logger('blog'));

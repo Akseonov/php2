@@ -5,7 +5,6 @@ namespace Akseonov\Php2\UnitTests\http\Actions\Users;
 use Akseonov\Php2\Blog\Repositories\RepositoryInterfaces\UsersRepositoryInterface;
 use Akseonov\Php2\Blog\User;
 use Akseonov\Php2\Blog\UUID;
-use Akseonov\Php2\Exceptions\JsonException;
 use Akseonov\Php2\Exceptions\UserNotFoundException;
 use Akseonov\Php2\http\Actions\Users\CreateUser;
 use Akseonov\Php2\http\ErrorResponse;
@@ -13,6 +12,7 @@ use Akseonov\Php2\http\Request;
 use Akseonov\Php2\http\SuccessfulResponse;
 use Akseonov\Php2\Person\Name;
 use Akseonov\Php2\UnitTests\DummyLogger;
+use JsonException;
 use PHPUnit\Framework\TestCase;
 
 class CreateUserActionTest extends TestCase
@@ -24,7 +24,7 @@ class CreateUserActionTest extends TestCase
             private bool $called = false;
 
             public function __construct(
-                private array $users,
+                private readonly array $users,
             )
             {
             }
@@ -88,7 +88,7 @@ class CreateUserActionTest extends TestCase
 
         $usersRepository = $this->usersRepository([]);
 
-        $action = new \Akseonov\Php2\http\Actions\Users\CreateUser($usersRepository, new DummyLogger());
+        $action = new CreateUser($usersRepository, new DummyLogger());
 
         $response = $action->handle($request);
 
@@ -103,9 +103,30 @@ class CreateUserActionTest extends TestCase
      * @preserveGlobalState disabled
      * @throws JsonException
      */
+    public function testItReturnsErrorResponseIfNoPasswordProvided(): void
+    {
+        $request = new Request([], [], '{"uuid":"2342342","username":"hello"}');
+
+        $usersRepository = $this->usersRepository([]);
+
+        $action = new CreateUser($usersRepository, new DummyLogger());
+
+        $response = $action->handle($request);
+
+        $this->assertInstanceOf(ErrorResponse::class, $response);
+        $this->expectOutputString('{"success":false,"reason":"No such Field: password"}');
+
+        $response->send();
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     * @throws JsonException
+     */
     public function testItReturnsErrorResponseIfNoFirstNameProvided(): void
     {
-        $request = new Request([], [], '{"username":"hello"}');
+        $request = new Request([], [], '{"username":"hello","password":"12345"}');
 
         $usersRepository = $this->usersRepository([]);
 
@@ -126,7 +147,7 @@ class CreateUserActionTest extends TestCase
      */
     public function testItReturnsErrorResponseIfNoLastNameProvided(): void
     {
-        $request = new Request([], [], '{"username":"hello","first_name":"bye"}');
+        $request = new Request([], [], '{"username":"hello","password":"12345","first_name":"bye"}');
 
         $usersRepository = $this->usersRepository([]);
 
@@ -147,12 +168,13 @@ class CreateUserActionTest extends TestCase
      */
     public function testItReturnsErrorResponseIfUserAlreadyExists(): void
     {
-        $request = new Request([], [], '{"username":"hello","first_name":"bye","last_name":"my"}');
+        $request = new Request([], [], '{"username":"hello","password":"12345","first_name":"bye","last_name":"my"}');
 
         $usersRepository = $this->usersRepository([
             new User(
                 new UUID('badad97b-a156-47f0-83b6-ea5f5fc8b044'),
                 'hello',
+                '12345',
                 new Name('first', 'last')
             )
         ]);
@@ -174,7 +196,7 @@ class CreateUserActionTest extends TestCase
      */
     public function testItReturnsSuccessfulResponse(): void
     {
-        $request = new Request([], [], '{"username":"hello","first_name":"bye","last_name":"my"}');
+        $request = new Request([], [], '{"username":"hello","password":"12345","first_name":"bye","last_name":"my"}');
 
         $usersRepository = $this->usersRepository([]);
 

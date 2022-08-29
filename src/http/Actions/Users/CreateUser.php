@@ -36,11 +36,9 @@ class CreateUser implements ActionInterface
                 throw new HttpException("User already exists: $username");
             }
 
-            $newUserUuid = UUID::random();
-
-            $user = new User(
-                $newUserUuid,
+            $user = User::createForm(
                 $username,
+                $request->jsonBodyField('password'),
                 new Name(
                     $request->jsonBodyField('first_name'),
                     $request->jsonBodyField('last_name')
@@ -52,10 +50,10 @@ class CreateUser implements ActionInterface
         }
 
         $this->usersRepository->save($user);
-        $this->logger->info("CreateUser action save user: $newUserUuid");
+        $this->logger->info("CreateUser action save user: {$user->getUuid()}");
 
         return new SuccessfulResponse([
-            'uuid' => (string)$newUserUuid
+            'uuid' => (string)$user->getUuid()
         ]);
     }
 
