@@ -16,6 +16,7 @@ use Akseonov\Php2\http\Request;
 use Akseonov\Php2\http\Response;
 use Akseonov\Php2\http\SuccessfulResponse;
 use DateTimeImmutable;
+use Psr\Log\LoggerInterface;
 
 class LogOut implements ActionInterface
 {
@@ -23,6 +24,7 @@ class LogOut implements ActionInterface
 
     public function __construct(
         private readonly AuthTokensRepositoryInterface $authTokensRepository,
+        private readonly LoggerInterface $logger,
     )
     {
     }
@@ -33,6 +35,8 @@ class LogOut implements ActionInterface
      */
     public function handle(Request $request): Response
     {
+        $this->logger->info('LogOut action start');
+
         try {
             $header = $request->header('Authorization');
         } catch (HttpException $exception) {
@@ -58,6 +62,7 @@ class LogOut implements ActionInterface
         );
 
         $this->authTokensRepository->save($newAuthToken);
+        $this->logger->info("LogOut action finish: {$newAuthToken->getToken()}");
 
         return new SuccessfulResponse([
             'token' => $newAuthToken->getToken(),

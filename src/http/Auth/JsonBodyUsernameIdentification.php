@@ -17,7 +17,6 @@ class JsonBodyUsernameIdentification implements IdentificationInterface
     ) {
     }
 
-
     /**
      * @throws AuthException
      */

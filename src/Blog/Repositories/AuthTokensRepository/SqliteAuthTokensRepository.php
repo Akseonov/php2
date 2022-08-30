@@ -13,11 +13,13 @@ use DateTimeInterface;
 use Exception;
 use PDO;
 use PDOException;
+use Psr\Log\LoggerInterface;
 
 class SqliteAuthTokensRepository implements AuthTokensRepositoryInterface
 {
     public function __construct(
-        private readonly PDO $connection
+        private readonly PDO $connection,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -26,6 +28,8 @@ class SqliteAuthTokensRepository implements AuthTokensRepositoryInterface
      */
     public function save(AuthToken $authToken): void
     {
+        $this->logger->info('Start save user token');
+
         $query = <<<'SQL'
             INSERT INTO tokens (token, user_uuid, expires_on) 
             VALUES (:token, :user_uuid, :expires_on)
@@ -40,7 +44,10 @@ SQL;
                 ':expires_on' => $authToken->getExpiresOn()
                     ->format(DateTimeInterface::ATOM),
             ]);
+
+            $this->logger->info("Finish save user token: {$authToken->getUserUuid()}");
         } catch (PDOException $exception) {
+            $this->logger->warning($exception->getMessage() . (int)$exception->getCode() . $exception);
             throw new AuthTokensRepositoryException(
                 $exception->getMessage(), (int)$exception->getCode(), $exception
             );
@@ -53,29 +60,38 @@ SQL;
      */
     public function get(string $token): AuthToken
     {
+        $this->logger->info('Start get user token');
+
         try {
             $statement = $this->connection->prepare(
                 'SELECT * FROM tokens WHERE token = ?'
             );
             $statement->execute([$token]);
             $result = $statement->fetch(PDO::FETCH_ASSOC);
+//            var_dump($result);
+//            die();
         } catch (PDOException $exception) {
+            $this->logger->warning($exception->getMessage() . (int)$exception->getCode() . $exception);
             throw new AuthTokensRepositoryException(
                 $exception->getMessage(), (int)$exception->getCode(), $exception
             );
         }
 
         if ($result === false) {
+            $this->logger->warning("Cannot find token: $token");
             throw new AuthTokenNotFoundException("Cannot find token: $token");
         }
 
         try {
+            $this->logger->info("Finish get user token: {$token}");
+
             return new AuthToken(
                 $result['token'],
                 new UUID($result['user_uuid']),
                 new DateTimeImmutable($result['expires_on'])
             );
         } catch (InvalidArgumentException | Exception $exception) {
+            $this->logger->warning($exception->getMessage() . (int)$exception->getCode() . $exception);
             throw new AuthTokensRepositoryException(
                 $exception->getMessage(), $exception->getCode(), $exception
             );

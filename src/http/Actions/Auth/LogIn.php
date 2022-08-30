@@ -14,12 +14,14 @@ use Akseonov\Php2\http\Response;
 use Akseonov\Php2\http\SuccessfulResponse;
 use DateTimeImmutable;
 use Exception;
+use Psr\Log\LoggerInterface;
 
 class LogIn implements ActionInterface
 {
     public function __construct(
         private readonly PasswordAuthenticationInterface $passwordAuthentication,
         private readonly AuthTokensRepositoryInterface $authTokensRepository,
+        private readonly LoggerInterface $logger,
     )
     {
     }
@@ -29,6 +31,8 @@ class LogIn implements ActionInterface
      */
     public function handle(Request $request): Response
     {
+        $this->logger->info('LogIn action start');
+
         try {
             $user = $this->passwordAuthentication->user($request);
         } catch (AuthException $exception) {
@@ -42,6 +46,7 @@ class LogIn implements ActionInterface
         );
 
         $this->authTokensRepository->save($authToken);
+        $this->logger->info("LogIn action finish: {$authToken->getToken()}");
 
         return new SuccessfulResponse([
             'token' => $authToken->getToken(),
