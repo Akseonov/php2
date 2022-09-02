@@ -88,6 +88,9 @@ class JsonBodyUsernameIdentificationTest extends TestCase
         $bearerTokenAuth->user($request);
     }
 
+    /**
+     * @throws AuthException
+     */
     public function testItReturn() {
         $request = new Request([], [], '{"username":"ivan"}');
 
