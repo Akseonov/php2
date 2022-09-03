@@ -1,0 +1,6 @@
+/vendor/
+.idea
+coverage_report
+.phpunit.result.cache
+/logs
+.env
